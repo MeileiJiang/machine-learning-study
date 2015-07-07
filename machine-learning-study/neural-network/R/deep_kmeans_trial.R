@@ -16,6 +16,12 @@ r2 = c(rep(1, 20), rep(0, 30), rep(1, 50))
 r3 = c(rep(1, 50), rep(0, 50))
 
 trainM = matrix(c(rep(r1, 60), rep(r2, 30), rep(r3, 80)), ncol = 100, byrow =T )
+noise = matrix(rnorm(170*100, 0 ,1), ncol = 100)
+train = trainM + noise
+
+km0 = kmeansruns(train, krange = 2:10, criterion = 'asw', critout=T)
+cl0 = km0$cluster
+table(cl0)
 
 # set up the autoencoder architecture  ------------------------------------
 
@@ -25,13 +31,13 @@ unit.type = "logistic"        ## specify the network unit type, i.e., the unit's
 Nx.patch=100                   ## width of training image patches, in pixels
 Ny.patch=1                   ## height of training image patches, in pixels
 N.input = Nx.patch*Ny.patch   ## number of units (neurons) in the input layer (one unit per pixel)
-N.hidden = 30              ## number of units in the hidden layer
+N.hidden = 10              ## number of units in the hidden layer
 lambda = 0.0002               ## weight decay parameter     
 beta = 6                      ## weight of sparsity penalty term 
 rho = 0.01                    ## desired sparsity parameter
 epsilon <- 0.001              ## a small parameter for initialization of weights 
 ## as small gaussian random numbers sampled from N(0,epsilon^2)
-max.iterations = 2000         ## number of iterations in optimizer
+max.iterations = 1000         ## number of iterations in optimizer
 
 # Train the auto encoder on training.matrix -------------------------------
 
