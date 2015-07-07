@@ -1,29 +1,31 @@
-##################################################################################################################
-## Autoencoder.R
-## Autoencoder is an unsupervised learning appraoch to get the feature of the data. We consider it as a non-linear
-## PCA. Our goal is to do clustering based on deep learning.
+##############################################################################
+## deep_kmeans_trial.R
+## This is a simulation study on the idea of deep k-means: 
+## Do k-means on the weighted matrix between output layer and hidden layer.
 ## Author: Meilei
-##################################################################################################################
+##############################################################################
 library(dplyr)
-library(ggplot2)
 library(autoencoder)
+library(fpc)
 
 
-# load the data in the package --------------------------------------------
-data('training_matrix_N=5e3_Ninput=100')
-## look at a smaller training set
-trainM = training.matrix[1:500,]
+# make the simulation data ------------------------------------------------
 
+r1 = c(rep(0, 20), rep(1, 80))
+r2 = c(rep(1, 20), rep(0, 30), rep(1, 50))
+r3 = c(rep(1, 50), rep(0, 50))
+
+trainM = matrix(c(rep(r1, 60), rep(r2, 30), rep(r3, 80)), ncol = 100, byrow =T )
 
 # set up the autoencoder architecture  ------------------------------------
 
 nl=3                          ## number of layers (default is 3: input, hidden, output)
 unit.type = "logistic"        ## specify the network unit type, i.e., the unit's 
 ## activation function ("logistic" or "tanh")
-Nx.patch=10                   ## width of training image patches, in pixels
-Ny.patch=10                   ## height of training image patches, in pixels
+Nx.patch=100                   ## width of training image patches, in pixels
+Ny.patch=1                   ## height of training image patches, in pixels
 N.input = Nx.patch*Ny.patch   ## number of units (neurons) in the input layer (one unit per pixel)
-N.hidden = 10*10                ## number of units in the hidden layer
+N.hidden = 30              ## number of units in the hidden layer
 lambda = 0.0002               ## weight decay parameter     
 beta = 6                      ## weight of sparsity penalty term 
 rho = 0.01                    ## desired sparsity parameter
@@ -31,23 +33,18 @@ epsilon <- 0.001              ## a small parameter for initialization of weights
 ## as small gaussian random numbers sampled from N(0,epsilon^2)
 max.iterations = 2000         ## number of iterations in optimizer
 
-
 # Train the auto encoder on training.matrix -------------------------------
 
-autoencoder.object <- autoencode(X.train=trainM,nl=nl,N.hidden=N.hidden,
+autoencoder.object <- autoencode(X.train=t(trainM),nl=nl,N.hidden=N.hidden,
                                  unit.type=unit.type,lambda=lambda,beta=beta,rho=rho,epsilon=epsilon,
                                  optim.method="BFGS",max.iterations=max.iterations,
                                  rescale.flag=TRUE,rescaling.offset=0.001)
 
-cat("autoencode(): mean squared error for training set: ",
-    round(autoencoder.object$mean.error.training.set,3),"\n")
-
 ## Extract weights W and biases b from autoencoder.object:
 W <- autoencoder.object$W
 b <- autoencoder.object$b
+WM = W[[2]]
 
-## Visualize hidden units' learned features:
-visualize.hidden.units(autoencoder.object,Nx.patch,Ny.patch)
-
-
-# I think we can apply K-means on the W[[2]]
+km = kmeansruns(WM, krange = 2:10, criterion = 'asw', critout=T)
+cl = km$cluster
+table(cl)
