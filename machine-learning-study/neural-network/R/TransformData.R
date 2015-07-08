@@ -2,7 +2,7 @@
 ## TransformData.R
 ## Transform the daily category behavior to a 0-1 matrix.
 ##
-## Author: Meilei
+## Author: Qunqun
 #########################################################################################################################
 library(dplyr)
 load("neural-network/Data/categoryEachDay.RData")
