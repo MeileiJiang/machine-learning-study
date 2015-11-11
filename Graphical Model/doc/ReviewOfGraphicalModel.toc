@@ -1,0 +1,6 @@
+\beamer@endinputifotherversion {3.26pt}
+\beamer@sectionintoc {1}{Gaussian Graphical Model}{3}{0}{1}
+\beamer@sectionintoc {2}{Penalized Likelihood Estimation Approach}{4}{0}{2}
+\beamer@sectionintoc {3}{Neighborhood Selection Approach}{7}{0}{3}
+\beamer@sectionintoc {4}{Joint Estimation of Multiple Graphical Models}{10}{0}{4}
+\beamer@sectionintoc {5}{On Time Varying Undirected Graphs}{11}{0}{5}

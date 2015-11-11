@@ -1,0 +1,326 @@
+
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+
+\documentclass{beamer}
+\usetheme{Madrid}
+
+\makeatletter
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{Name in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{ Institute in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex} 
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\makeatother
+
+\newcommand{\boldalpha}{{\boldsymbol{\alpha}}}
+\newcommand{\boldbeta}{{\boldsymbol{\beta}}}
+\newcommand{\boldmu}{{\boldsymbol{\mu}}}
+\newcommand{\boldeta}{{\boldsymbol{\eta}}}
+\newcommand{\boldtheta}{{\boldsymbol{\theta}}}
+\newcommand{\boldrho}{{\boldsymbol{\rho}}}
+\newcommand{\boldsigma}{{\boldsymbol{\sigma}}}
+\newcommand{\boldOmega}{{\boldsymbol{\Omega}}}
+\newcommand{\boldSigma}{{\boldsymbol{\Sigma}}}
+\newcommand{\boldGamma}{{\boldsymbol{\Gamma}}}
+\newcommand{\boldTheta}{{\boldsymbol{\Theta}}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\Exp}{{\mathbb{E}}}
+\newcommand{\ind}{{\mathbbm{1}}}
+\newcommand{\RN}[1]{%
+  \textup{\uppercase\expandafter{\romannumeral#1}}%
+}
+
+
+\usepackage{lineno,hyperref}
+\usepackage{natbib}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\date{\today} % Date, can be changed to a custom date
+\title[Department of Statistics and Operations Research]{Review of Gaussian Graphical Model} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author[Meilei Jiang(UNC-CH)]{Meilei Jiang$^\text{\dag}$} % Your name
+\institute % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{
+$^\text{\dag}$Department of Statistics and Operations Research\\
+ University of North Carolina at Chapel Hill \\ % Your institution for the title page
+}
+
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\begin{frame}
+\frametitle{Overview} % Table of contents slide, comment this block out to remove it
+\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+\end{frame}
+
+
+%\AtBeginSection[]
+%{
+%  \begin{frame}
+%    \frametitle{Table of Contents}
+%    \tableofcontents[currentsection]
+ % \end{frame}
+%}
+
+
+%----------------------------------------------------------------------------------------
+%	PRESENTATION SLIDES
+%----------------------------------------------------------------------------------------
+
+%------------------------------------------------
+\section{Gaussian Graphical Model}
+
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Gaussian Graphical Model}
+\begin{itemize}
+\item $\mathbf{X} = (X^{(1)}, X^{(2)}, \cdots, X^{(p)})$ and $\mathbf{X} \sim \mathcal{N}_p(\boldmu, \boldSigma)$
+    \begin{itemize}
+    \item Precision matrix $\mathbf{C} = \boldSigma^{-1}$.
+    \item Partial correlation between $X^{(i)}$ and $X^{(j)}$: $\rho^{ij} = -(c_{ij}/\sqrt{c_{ii}c_{jj}})$. 
+    \end{itemize}
+\item Graph $G = (V, E)$, $V = \{ X^{(1)}, X^{(2)}, \cdots, X^{(p)} \}, E \in V \times V$.
+    \begin{itemize}
+    \item $e_{ij} \in E$ if and only if $c_{ij} \neq 0$
+    \end{itemize}    
+\item $\mathbf{X}_1, \mathbf{X}_2, \dots, \mathbf{X}_n$ is a random sample of $\mathbf{X}$.    
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+\section{Penalized Likelihood Estimation Approach}
+
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Log-likelihood Estimation}
+\begin{itemize}
+\item Log-likelihood function $l(\mathbf{C}) = \frac{1}{2} \log \text{det} (\mathbf{C}) - \frac{1}{2} \langle \hat{\boldSigma}, \mathbf{C} \rangle + \text{Constant}$.
+    \begin{itemize} 
+    \item $\hat{\boldSigma} = \frac{1}{n} \sum_{\substack{i = 1}}^n (\mathbf{X}_i - \bar{\mathbf{X}}) (\mathbf{X}_i - \bar{\mathbf{X}})' $ 
+    \item $\langle \hat{\boldSigma}, \mathbf{C} \rangle = \text{tr}(\hat{\boldSigma} \mathbf{C} )$
+    \end{itemize}
+\item When $ n > p$, the global maximizer of $l(\mathbf{C})$ is given by $\hat{\mathbf{C}} = \hat{\boldSigma}^{-1}$.   
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Penalized Likelihood Estimation}
+
+In order to estimate a sparse graph, a penalty term $\sum_{\substack{i = 1}}^p \sum_{\substack{j = 1}}^p p_{\lambda_{ij}} (|c_{ij}|)$ has been added. 
+\begin{itemize}
+\item LASSO:  $\max_{\substack{\mathbf{C} \in S_p}} \log \text{det} (\mathbf{C}) -  \langle \hat{\boldSigma}, \mathbf{C} \rangle  - \lambda \sum_{\substack{i \neq j}}  |c_{ij}|$
+   
+\item SCAD: $\max_{\substack{\mathbf{C} \in S_p}} \log \text{det} (\mathbf{C}) -  \langle \hat{\boldSigma}, \mathbf{C} \rangle  - \sum_{\substack{i = 1}}^p \sum_{\substack{j = 1}}^p \text{SCAD}_{\lambda, a}(|c_{ij}|)$
+    \begin{itemize}
+    \item $\text{SCAD}_{\lambda, a}^{'}(x) = \lambda \Big\{ I(|x| \leq \lambda) + \frac{(a \lambda - |x|)_{+}}{(a - 1)\lambda} I(|x| > \lambda) \Big\}$
+    \end{itemize}     
+\item Adaptive LASSO: $\max_{\substack{\mathbf{C} \in S_p}} \log \text{det} (\mathbf{C}) -  \langle \hat{\boldSigma}, \mathbf{C} \rangle - \lambda \sum_{\substack{i = 1}}^p \sum_{\substack{j = 1}}^p \tilde{c}_{ij} |c_{ij}| $.  
+    \begin{itemize}
+    \item $\tilde{\mathbf{C}} = (\tilde{c}_{ij})$ can be any consistent estimate of $\mathbf{C}$. 
+    \end{itemize}  
+\item Iterative reweighted penalized likelihood: $\max_{\substack{\mathbf{C} \in S_p}} \log \text{det} (\mathbf{C}) -  \langle \hat{\boldSigma}, \mathbf{C} \rangle - \sum_{\substack{i = 1}}^p \sum_{\substack{j = 1}}^p \tilde{c}_{ij} |c_{ij}| $.   
+    \begin{itemize}
+    \item $\tilde{c}_{ij} = p_{\lambda}^{'}(|\hat{c}_{ij}^{(k)}|)$
+    \end{itemize} 
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Model Selection in Penalized Likelihood Estimation}
+
+\begin{itemize}
+
+\item $\text{BIC}(\lambda) = - \log \text{det}(\lambda) + \text{tr}(\hat{\mathbf{C}} \boldSigma) + \frac{\log{n}}{n} \sum_{\substack{i \leq j}} \hat{e}_{ij}(\lambda) $
+    \begin{itemize}
+    \item $\hat{e}_{ij} = 0$, if $\hat{c}_{ij} = 0$, and $\hat{e}_{ij} = 1$ otherwise.
+    \end{itemize}
+    
+\item The K-fold cross validation: $\text{CV}(\lambda) = \sum_{\substack{k = 1}}^K \Big( n_k \log |\hat{\mathbf{C}}_{-k}(\lambda)| - \sum_{\substack{i \in T_k}} \mathbf{X}_{i}^{T} \hat{\mathbf{C}}_{-k}(\lambda) \mathbf{X}_i \Big) $  
+    \begin{itemize}
+    \item $T_k$ is the $k$th fold of training set with size $n_k$. 
+    \item $\hat{\mathbf{C}}_{-k}(\lambda)$ is estimated based on the training samples without $T_k$. 
+    \end{itemize}
+    
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+\section{Neighborhood Selection Approach}
+
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Local Neighborhood Selection}
+
+\begin{itemize}
+\item The neighborhood $\text{ne}_a$ of the node $X^{(a)}$ is the smallest subset of $V$, such that $ X^{(a)} \perp \{ X^{(k)}; k \in V\setminus \text{cl}_a \} $.
+    \begin{itemize}
+    \item $\text{cl}_a = \text{ne}_a \cup {a}$.
+    \end{itemize}
+    
+\item Optimal prediction: $\theta^{a} = \argmin_{\substack{\theta: \theta_a = 0}} \Exp(X^{(a)} - \sum_{k \in V} \theta_k X^{(k)}) $.
+    \begin{itemize}
+    \item $\theta_b^a = - c_{ab} / c_{aa}$.
+    \item $\text{ne}_a = \{ b \in V: \theta_b^a \neq 0 \}$.
+    \end{itemize}    
+    
+\item Neighborhood selection with the Lasso: $\hat{\theta}^{a, \lambda} = \argmin_{\substack{\theta: \theta_a = 0}} n^{-1} \|(\mathbf{X}^{(a)} - \mathbf{X} \theta) \|_2^2 + \lambda \| \theta \|_1$.   
+    \begin{itemize}
+    \item $\hat{\text{ne}}_a^{\lambda} = \{ b \in V: \hat{\theta}_b^{a, \lambda} \neq 0 \}$.
+    \end{itemize}    
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Local Neighborhood selection}
+
+\begin{itemize}
+\item The edge set $E = \{ (a, b): a \in \text{ne}_b \wedge b \in \text{ne}_a \}$
+    \begin{itemize}
+    \item $\hat{E}^{\lambda, \wedge} = \{ (a, b): a \in \hat{\text{ne}}_b \wedge b \in \hat{\text{ne}}_a \}$
+    \item $\hat{E}^{\lambda, \vee} = \{ (a, b): a \in \hat{\text{ne}}_b \vee b \in \hat{\text{ne}}_a \}$
+    \end{itemize}
+\item Under certain assumptions, both $\hat{E}^{\lambda, \wedge}$ and $\hat{E}^{\lambda, \vee}$ are consistent.    
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Joint Sparse Regression Model}
+
+\begin{itemize}
+\item $L_n(\boldtheta, \mathbf{C}, \mathbf{X}) = \frac{1}{2}\Big( \sum_{i = 1}^p w_i \| \mathbf{X}^{(i)} - \sum_{\substack{j \neq i}} \beta_{ij} \mathbf{X}^{(j)} \|^2 \Big) $
+    \begin{itemize}
+    \item $\beta_{ij} = \rho^{ij} \sqrt{\frac{c_{jj}}{c_{ii}}}$
+    \item $\boldtheta = (\rho^{12}, \cdots, \rho^{(p-1)p})^T$
+    \end{itemize}
+\item $\mathcal{L}_n(\boldtheta, \mathbf{C}, \mathbf{X})  = L_n(\boldtheta, \mathbf{C}, \mathbf{X})  + \mathcal{J}(\boldtheta)$.
+    \begin{itemize}
+    \item $\mathcal{J}(\boldtheta) = \lambda \| \boldtheta \|_1$.
+    \end{itemize}
+\item Solve $\mathcal{L}_n(\boldtheta, \mathbf{C}, \mathbf{X}) $: active-shooting
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+\section{Joint Estimation of Multiple Graphical Models}
+
+\begin{frame}
+
+\frametitle{Joint Estimation of Multiple Graphical Models}
+
+\begin{itemize}
+\item Heterogeneous dataset with $p$ variables and $K$ categories.
+    \begin{itemize}
+    \item $\mathbf{X}_i^{(k)} = (X_{i,1}^{(k)}, X_{i,2}^{(k)}, \cdots, X_{i,p}^{(k)}) \sim \mathcal{N}(0, \boldSigma^{(k)}), i = 1, \dots, n_k; k = 1, \dots, K.$
+    \item $\mathbf{C}^{k} = (\boldSigma^{(k)})^{-1}$
+    \end{itemize} 
+    
+\item Reparameterization: $c_{j j'}^{(k)} = \theta_{j j'} \gamma_{j j'}^{(k)}, 1 \leq j \neq j' \leq p; k = 1, \dots, K$. 
+    \begin{itemize}
+    \item $\theta_{j j'} = \theta_{j' j} \geq 0, \gamma_{j j'}^{(k)}= \gamma_{j' j}^{(k)}, 1 \leq j \neq j' \leq p$.
+    \item $\theta_{j j} = 1, c_{j j}^{(k)} = \gamma_{j j}^{(k)}$.
+    \end{itemize}   
+    
+\item $\min_{\boldTheta, (\boldGamma^{(k)})_{\substack{k = 1}^K}} \sum_{\substack{ k = 1}}^K \Big[ \text{tr}(\hat{\boldSigma}^{(k)} \mathbf{C}^{(k)} - \log \text{det}(\mathbf{C}^{(k)}) \Big] + \eta_1 \sum_{\substack{j \neq j'}} \theta_{jj'} + \eta_2 \sum_{\substack{j \neq j'}} \sum_{\substack{k = 1}}^K |\gamma_{j j'}^{(k)}|$   
+\end{itemize}
+
+\end{frame}
+
+
+%------------------------------------------------
+
+\section{On Time Varying Undirected Graphs}
+\begin{frame}
+
+\frametitle{On Time Varying Undirected Graphs}
+
+\begin{itemize}
+\item $\mathbf{x}^i \sim \mathcal(0, \boldSigma^{t_i}), i = 1, \dots, n. t_i = i /n$.
+\item $G^{t_i} = (V, E^{t_i})$
+\item $\mathbf{C}^{t_i} = (\boldSigma^{t_i})^{-1}$
+    \begin{itemize}
+    \item $\hat{\mathbf{C}}^{\tau} = \argmin_{\mathbf{C} > 0}\{\text{tr}\mathbf{C}\hat{\boldSigma}^{\tau} - \log |\mathbf{C}| + \lambda \| \mathbf{C}^{-} \|_1 \} $
+    \item $\hat{\boldSigma}^{\tau} = \sum_{\substack{i}} w_i^{\tau} \mathbf{x}^i (\mathbf{x}^i)' $
+    \item $w_i^{\tau} = \frac{K_h(t_i - \tau)}{\sum_{\substack{i}} K_h(t_i - \tau)}$
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Time Varying Undirected Graphs: Penalized likelihood estimation}
+
+\begin{itemize}
+\item $\hat{\mathbf{C}}^{\tau} = \argmin_{\mathbf{C} > 0}\{\text{tr}\mathbf{C}\hat{\boldSigma}^{\tau} - \log |\mathbf{C}| + \lambda \| \mathbf{C}^{-} \|_1 \} $
+\item $\hat{\boldSigma}^{\tau} = \sum_{\substack{i}} w_i^{\tau} \mathbf{x}^i (\mathbf{x}^i)' $
+\item $w_i^{\tau} = \frac{K_h(t_i - \tau)}{\sum_{\substack{i}} K_h(t_i - \tau)}$
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+
+\frametitle{Time Varying Undirected Graphs: Nearest neighbor selection}
+
+\begin{itemize}
+\item The partial correlation coefficient $\rho_{ab}^t = - c_{ab}^t / \sqrt{c_{aa}^t c_{bb}^t} $
+\item $X_a = \sum_{\substack{b \in V\setminus \{a\} }} X_b \theta_{ab}^t + \epsilon_a^t, a \in V $
+\item $\hat{\boldtheta}_{\setminus a }^{\tau} = \argmin_{\boldtheta \in \mathbb{R}^{p-1}} \sum_{\substack{i}} \Big( x_a^i - \sum_{\substack{b \neq a}} x_b^i \theta_b \Big)^2 w_i^{\tau} + \lambda \| \boldtheta \|_1 $.
+\item $\hat{\text{ne}}_a^{\tau} = \text{ne}(\hat{\boldtheta}_{\setminus a }^{\tau})$.
+\item $\hat{E}^{\tau, \wedge} = \{ (a, b): a \in \hat{\text{ne}}_b^{\tau} \wedge b \in \hat{\text{ne}}_a^{\tau} \}$, $\hat{E}^{\tau, \vee} = \{ (a, b): a \in \hat{\text{ne}}_b^{\tau} \vee b \in \hat{\text{ne}}_a^{\tau} \}$
+
+\end{itemize}
+
+
+\end{frame}
+%------------------------------------------------
+\end{document}
