@@ -1,0 +1,82 @@
+%----------------------------------------------------------------------------------------
+%	DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+\documentclass[11pt]{article}
+
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{cleveref}
+
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+
+\usepackage{epsfig}
+\usepackage{amscd}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{enumerate}
+\usepackage{tikz}
+
+
+\usepackage[top=1.5in,bottom=1.5in,right=1.5in, left=1.5in]{geometry}
+
+\captionsetup[subfigure]{subrefformat=simple,labelformat=simple}
+\renewcommand\thesubfigure{(\alph{subfigure})}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\author{Meilei Jiang\\
+    Department of Statistics and Operations Research\\
+		University of North Carolina at Chapel Hill}
+\title{Dynamic Gaussian Graphical Model: coefficient varying model for partial correlation estimation}
+
+\maketitle
+
+\section{Overview of estimation in graphical models}
+
+Graphical models are quite useful  in many domains to uncover the dependence structure among observed variables. Typically, we consider a $p$-dimensional multivariate normal distributed random variable $ X = (X_1, \cdots, X_p) \sim \mathbb{N}(\mu, \Sigma) $, where $p$ is the number of features. Then a graph of these $p$ features can be constructed based on there conditional dependence structure. More precisely, we can construct a Gaussian graphical model $\mathcal{G} = (V, E)$, where $V = \{ 1, \cdots, p\}$ is the set of nodes and $E = \{ (i, j) | X_i \text{ is conditionally dependent with } X_b, \text{given } X_{V/\{i, j\}}\}$.     
+
+Let $\Omega = \Sigma^{-1} = (\omega_{i,j})_{1\leq i, j \leq p}$ be the precision matrix. Then $X_i$ and $X_j$ are conditionally dependent given other features if and only if $\omega_{ij} = 0$. Therefore, estimating the covariance matrix and precision matrix of $X$ is equivalent to estimate the structure of Gaussian graphical model $\mathcal{G}$. More discussion can be found in \cite{lauritzen1996graphical}.
+
+There are lots of literatures discussing about estimating $\Sigma$ and $\Omega$. Utilizing the idea of LASSO from Tibshirani~\cite{tibshirani1996regression}, Meinshausen and B{\"u}hlmann~\cite{meinshausen2006high} performed a computationally attractive method for nearest neighborhood selection at each node in the graph. Another nature way is to estimate $\Sigma$ and $\Omega$ is the penalized likelihood approach. Friedman, Hastie nd Tibshirani~\cite{friedman2008sparse} proposed the graphical lasso. Fan, Feng and Wu~\cite{fan2009network} studied the penalized likelihood methods with the SCAD penalty and the adaptive LASSO penalty. Cai, Liu and Luo~\cite{cai2011constrained} performed a constrained $l_1$ minimization approach to estimate sparse precision matrix (CLIME). 
+
+In practice, dynamic graphical model are very attractive. We can consider dynamic graphical model under the context of varying coefficient model~\cite{hastie1993varying, fan1999statistical, fan2008statistical}. Zhou, Laffery and Wasserman~\cite{zhou2010time} developed a nonparametric framework for estimating time varying graphical model for estimating time varying graphical structure for multivariate Gaussian distributions $X^t \sim \mathbb{N}(0, \Sigma(t))$ using $l_1$ regularization method. Zhou's model assumed that the observations $X^t$ are independent and changed smoothly. Kolar and Xing~\cite{kolar2011time} showed the model selection consistency for the procedure proposed in Zhou et al.~\cite{zhou2010time} and for the modified neighborhood selection procedure of Meinshausen and B{\"u}hlmann~\cite{meinshausen2006high}. 
+
+
+\subsection{Nearest neighbor selection approach}
+
+\subsection{Penalized likelihood approach}
+
+\subsection{Constrained $l1$ Minimization Approach}
+
+\subsection{time-varying graph and coefficient varying models}
+
+\section{Joint estimation of multiple graphs}
+
+\subsection{Stationary graphs with spacial-temporal dependence: GEMINI}
+
+\subsection{Time varying graph estimation through smoothed covariance matrix}
+
+\subsection{Fused Graphical Lasso}
+
+\subsection{Smoothed Kendall's tau correlation matrix}
+
+\bibliographystyle{plain}
+\bibliography{dynamicgraph}
+
+\end{document}
