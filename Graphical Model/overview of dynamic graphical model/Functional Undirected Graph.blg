@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: Functional Undirected Graph.aux
+The style file: plain.bst
+Database file #1: dynamicgraph.bib
+Warning--empty journal in kolar2011time
+You've used 16 entries,
+            2118 wiz_defined-function locations,
+            594 strings with 6450 characters,
+and the built_in function-call counts, 5701 in all, are:
+= -- 583
+> -- 246
+< -- 5
++ -- 98
+- -- 80
+* -- 384
+:= -- 926
+add.period$ -- 48
+call.type$ -- 16
+change.case$ -- 87
+chr.to.int$ -- 0
+cite$ -- 17
+duplicate$ -- 225
+empty$ -- 424
+format.name$ -- 80
+if$ -- 1204
+int.to.chr$ -- 0
+int.to.str$ -- 16
+missing$ -- 17
+newline$ -- 83
+num.names$ -- 32
+pop$ -- 80
+preamble$ -- 1
+purify$ -- 72
+quote$ -- 0
+skip$ -- 184
+stack$ -- 0
+substring$ -- 409
+swap$ -- 66
+text.length$ -- 5
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 62
+warning$ -- 1
+while$ -- 59
+width$ -- 18
+write$ -- 173
+(There was 1 warning)
