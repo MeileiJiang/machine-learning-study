@@ -1,5 +1,5 @@
 #####################################################################################
-## B-spline.R
+## FLiRTI.R
 ## Understand how to utilize B-spline.
 ## Author: Meilei
 #####################################################################################
@@ -55,8 +55,9 @@ Rowbdiag = function(M){
   return(newM)
 }
 
-A = Rowbdiag(B)
-A = Rowbdiag(rbind(B, D2B))
+# A = Rowbdiag(B)
+A = Rowbdiag(rbind(B, D1B))
+Ap = solve(t(A)%*% A) %*% t(A)
 
 ## Set the parameter for plots
 
@@ -80,6 +81,7 @@ for(t in 1:length(time)){
                           B[t,], B[t,], B[t,], B[t,]))
   U1[ (1+(t-1)*n) : (t*n),] = X1[(1+(t-1)*n) : (t*n),]%*% t(diagB)
 }
+dim(U1)
 
 
 # directly solve the model ------------------------------------------------
@@ -90,15 +92,18 @@ gamma1 = as.matrix(coef.glmnet(fit1, s = S)[-1,1])
 
 
 
-# solve by generalized lasso ---------------------------------------------------------
+# solve by FLiRTI ---------------------------------------------------------
+
+V1 = U1 %*% Ap
+dim(V1)
+
+fit1.0 = glmnet(x = V1, y = Y1, family = "gaussian", intercept = F)
+
+eta1 = as.matrix(coef.glmnet(fit1.0, s = 0.09)[-1,1])
+
+gamma1 = Ap %*% eta1
 
 
-out1 = genlasso(y = Y1, X = U1, D = A)
-plot(out1)
-
-# get the estimation of gamma -- coefficients of basis functions for beta(t) -------------------------------------------
-
-gamma1 = coef.genlasso(out1, lambda = 1.89)$beta
 
 # get the coeffiecient function beta(t)
 
