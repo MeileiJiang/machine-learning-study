@@ -80,7 +80,7 @@
 \author{Meilei Jiang, Yufeng Liu\\
     Department of Statistics and Operations Research\\
 		University of North Carolina at Chapel Hill}
-\title{Functional Undirected Graph}
+\title{Functional Sparse Estimation of Time Varying Graphical Model}
 
 \maketitle
 
@@ -99,7 +99,7 @@ Zhou, Laffery and Wasserman~\cite{zhou2010time} developed a nonparametric framew
 All these methods mentioned above can only estimate multiple graphs on several fix points. If we are interested in estimating a dynamic graph which is smoothing over a time region, a functional model which consider each feature as functional data over time is very attractive. Since the structure of Gaussian graph can be recovered though regression approach, we can consider dynamic graphical model under the context of varying coefficient model~\cite{hastie1993varying, fan1999statistical, fan2008statistical}. Typically, we are interested in a nonparametric approach to estimate the varying coefficient models in Huang, Wu and Zhou's paper~\cite{huang2002varying}. 
 $$ Y(t) = X(t)^T \bbeta(t) + \varepsilon(t) $$
 Then we are looking at the following model
-$$ X_i(t) = \bX_{-i}^T \bbeta_i(t) + \varepsilon(t) = \sum_{\substack{j\neq i}} X_j(t) \beta_{ij}(t) + \varepsilon(t). $$
+$$ X_i(t) = \bX_{-i}^T(t) \bbeta_i(t) + \varepsilon_i(t) = \sum_{\substack{j\neq i}} X_j(t) \beta_{ij}(t) + \varepsilon_i(t). $$
 Moreover, in order to estimate a sparse graph, we need to gain sparse functional coefficient $\bbeta(t)$. Based on the idea of FLiRTI in James, Wang and Zhu's paper~\cite{james2009functional}, we put penalty on the derivative matrices of $\bbeta(t)$.  
 
 
@@ -117,25 +117,25 @@ Define the undirected graph
 	\end{aligned}
 \end{equation}
 
-Namely, $G(t)$ is the Gaussian graphical model at each $t$. This model is quite flexible, which allows $G(t)$ evolve over time and includes the time dependence. Assume that data are observed at $t_1, \cdots, t_n$. 
+Namely, $G(t)$ is the Gaussian graphical model at each $t$. This model is quite flexible, which allows $G(t)$ evolve over time and includes the time dependence. Assume that data are observed at $t_1, \cdots, t_n$ and at each time point $t$ we have $n_{t}$ samples.
 
 \subsection{Functional Nearest Neighborhood Selection}
 
 Consider the following functional linear model
 \begin{equation} 	\label{eq:flm}
     \begin{aligned}
-    X_i(t) &= \bX_{-i}^T \bbeta_i(t) + \varepsilon(t) = \sum_{\substack{j\neq i}} X_j(t) \beta_{ij}(t) + \varepsilon(t),\\
-    \text{ where }\bX_{-i}(t) &= (X_j(t))_{\substack{j \neq i}} \in \R^{(p-1) \times 1}, t = t_1, \cdots, t_n, i = 1, \cdots, p.
+    X_i^r(t) &= {\bX_{-i}^r(t)}^T \bbeta_i(t) + \varepsilon_i^r(t) = \sum_{\substack{j\neq i}} X_j^r(t) \beta_{ij}(t) + \varepsilon_i^r(t),\\
+    \text{ where }\bX_{-i}^r(t) &= (X_j^r(t))_{\substack{j \neq i}} \in \R^{(p-1) \times 1}, r = 1, \cdots, n_t, t = t_1, \cdots, t_n, i = 1, \cdots, p.
     \end{aligned}
 \end{equation}
-For each functional coefficient $\beta_{ij}(t)$, we consider the basis $\bB_{ij}(t) = (B_{ij1}(t), \cdots, B_{ijk_{ij}}(t) )^T$ and then 
-$$\beta_{ij}(t) = \sum_{\substack{s=1}}^{k_{ij}} B_{ijs}(t) \gamma_{ijs} + e_{ij}(t) = \bB_{ij}^T(t) \bgamma_{ij} $$
+For each functional coefficient $\beta_{ij}(t)$, we consider the basis $\bB_{ij}(t) = (B_{ij1}(t), \cdots, B_{ijk_{ij}}(t) )$ and then 
+$$\beta_{ij}(t) = \sum_{\substack{s=1}}^{k_{ij}} B_{ijs}(t) \gamma_{ijs} + e_{ij}(t) = \bB_{ij}(t) \bgamma_{ij} $$
 Thus Equation~(\ref{eq:flm}) can be represented as
 \begin{equation}
 	\label{eq:flm2}
 	\begin{aligned}
-	X_i(t) &= \sum_{\substack{j \neq i}} \sum_{\substack{s=1}}^{k_{ij}} X_j(t) B_{ijs}(t) \gamma_{ijs} + \varepsilon^*(t), \\
-	\text{where } \varepsilon^*(t) &= \sum_{\substack{j \neq i}} X_j(t)e_{ij}(t) + \varepsilon(t), t = t_1, \cdots, t_n, i = 1, \cdots, p.\\
+	X_i^r(t) &= \sum_{\substack{j \neq i}} \sum_{\substack{s=1}}^{k_{ij}} X_j^r(t) B_{ijs}(t) \gamma_{ijs} + \tilde{\varepsilon}^r(t), \\
+	\text{where } \tilde{\varepsilon}^r(t) &= \sum_{\substack{j \neq i}} X_j^r(t)e_{ij}^r(t) + \varepsilon^r(t), r = 1, \cdots, n_t, t = t_1, \cdots, t_n, i = 1, \cdots, p.\\
 	\end{aligned}
 \end{equation}
 As seen in Equation~(\ref{eq:flm2}), our model is quite flexible since the basis of each functional coefficient can be different.
@@ -143,20 +143,23 @@ As seen in Equation~(\ref{eq:flm2}), our model is quite flexible since the basis
 To get the matrix form of Equation~(\ref{eq:flm2}), denote 
 \begin{align*}
 	&\bB(t) = \text{diag}\{\bB_{ij}(t)\} \in \R^{(p-1)\times \sum_{\substack{j \neq i}}k_{ij} },\\
-	&\bU_i(t) = \bB(t)^T X_{-i}(t) \in \R^{ \sum_{\substack{j \neq i}}k_{ij} \times 1},\\
-	&\bU_i = ( \bU_i(t_1), \cdots, \bU_i(t_n) )^T \in \R^{n \times \sum_{\substack{j \neq i}}k_{ij}},\\
-	&\bX_i = (X_i(t_1), \cdots, X_i(t_n))^T \in \R^{n \times 1},\\
-	&\bvarepsilon_i = (\varepsilon_i(t_1), \cdots, \varepsilon_i(t_n))^T \in \R^{n \times 1},\\
+	&\bU_i^r(t) = \bB(t)^T X_{-i}^r(t) \in \R^{ \sum_{\substack{j \neq i}}k_{ij} \times 1},\\
+	&\bU_i(t) = ( \bU_i^1(t), \cdots, \bU_i^{n_t}(t) )^T \in \R^{n_t \times \sum_{\substack{j \neq i}}k_{ij}},\\
+	&\bU_i = ( \bU_i(t_1), \cdots, \bU_i(t_n) )^T \in \R^{\sum_{t = 1}^{n}n_t \times \sum_{\substack{j \neq i}}k_{ij}},\\
+	&\bX_i(t) = (X_i^1(t), \cdots, X_i^{n_t}(t))^T \in \R^{n_t \times 1},\\
+	&\bX_i = (X_i(t_1), \cdots, X_i(t_n))^T \in \R^{\sum_{t = 1}^{n}n_t \times 1},\\
+	&\bvarepsilon_i(t) = (\varepsilon_i^1(t), \cdots, \varepsilon_i^{n_t}(t))^T \in \R^{n_t \times 1},\\
+	&\bvarepsilon_i = (\varepsilon_i(t_1), \cdots, \varepsilon_i(t_n))^T \in \R^{\sum_{t = 1}^{n}n_t \times 1},\\
 	&\bgamma_i = (\bgamma_{ij})_{j \neq i} \in \R^{\sum_{\substack{j \neq i}}k_{ij} \times 1}.
 \end{align*}
 
 Then the Equation~(\ref{eq:flm2}) can be expressed as
 \begin{equation}
 	\label{eq:flm3}
-	\bX_i = \bU_i^T \bgamma_i + \bvarepsilon_i, i = 1, \cdots, p.
+	\bX_i = \bU_i \bgamma_i + \bvarepsilon_i, i = 1, \cdots, p.
 \end{equation}
  
-\section{Estimation and Computation}
+\subsection{Control The Sparsity Of Derivatives}
 
 In Model~(\ref{eq:flm3}), we want to estimate a sparse graph and interpretable coefficient functions. For each $i$ and $j \neq i$, we want to control the sparsity of $ \beta_{ij}^{(m)} = \frac{\mathrm{d^m}}{\mathrm{d} t^m} \beta_{ij}(t) \approx \frac{\mathrm{d^m}}{\mathrm{d} t^m} \bB_{ij}(t)^T \bgamma_{ij}$ for some $m$. Say assume $\beta_{ij}^{(0)}(t) = 0$ and $\beta_{ij}^{(2)}(t) = 0$ in large area, then $\beta_{ij}(t)$ is zero in many region and linear in the left regions.
 
@@ -170,47 +173,51 @@ Next, set
 \begin{equation}
 	\bseta_{ij} = \bA_{ij} \bgamma_{ij} \in \R^{n \times 1}  
 \end{equation}
-Then $\bseta_{ij} \approx (\beta_{ij}^{(m)}(t_k))_{1 \leq k \leq n}$. In order to incorporate $\bseta_{ij}$ into the model~\ref{eq:flm3}, we need to represent $\bgamma_{ij}$ as a transformation of $\bseta_{ij}$. 
-
-When $\bA_{ij}$ is row full rank (i.e. $k_{ij} \geq n$), there exists an upper triangle matrix $\bM_{ij} \in \R^{n \times n}$, such that $\bM_{ij} \bA_{ij} = (\bI_n, \mathbf{0})$. Similarly, we denote the first $n$ rows of $\bgamma_{ij}$ as $\bgamma_{ij}^{(1)}$, and the left as $\bgamma_{ij}^{(2)}$. Thus, $\bgamma_{ij}^{(1)} = \bM_{ij} \bseta_{ij}$ and $\bgamma_{ij} = (\bM_{ij} \bseta_{ij}, \bgamma_{ij}^{(2)})$. 
-
-When $\bA_{ij}$ is column full rank (i.e. $k_{ij} < n$), we can also find an upper triangle matrix $\bM_{ij} \in \R^{n \times n}$, such that, $\bM_{ij} \bA_{ij} = (\bI_{k_{ij}}, \mathbf{0})^T$. And we denote the first $k_{ij}$ rows of $\bM_{ij}$ as $\bM_{ij}^{(1)}$, and the left as $\bM_{ij}^{(2)}$. Then $\bgamma_{ij} = \bM_{ij}^{(1)}\bseta_{ij}$.
-
-To be concise, we denote $\bgamma_{ij} = \bM_{ij}^* \bseta_{ij}^* = \begin{cases}
-\begin{bmatrix}
-\bM_{ij}  & \mathbf{0} \\
-\mathbf{0} & \bI_{k_{ij} - n} \\
-\end{bmatrix} \begin{bmatrix}
-\bseta_{ij} \\
-\bgamma_{ij}^{(2)} \\
-\end{bmatrix}      & \quad \text{if } k_{ij} \geq n, \\
-\bM_{ij}^{(1)}\bseta_{ij}  & \quad \text{otherwise. }\\
-\end{cases}$. Then we have 
+Then $\bseta_{ij} \approx (\beta_{ij}^{(m)}(t_k))_{1 \leq k \leq n}$. Moreover, we denote 
 \begin{equation}
 	\begin{aligned}
-	&\bgamma_i = \bM_i^* \bseta_i^*, \\
-	&\text{where } \bM_i^* = \text{diag} \{\bM_{ij}^*\}_{j \neq i} \in \R^{(\sum_{\substack{j \neq i}} k_{ij}) \times (\sum_{\substack{j \neq i}} k_{ij}^*)},\\ 
-	&\bseta_i^* = (\bseta_{ij}^*)_{j \neq i} \in \R^{(\sum_{\substack{j \neq i}} k_{ij}^*) \times 1} \text{and } k_{ij}^* = \max (k_{ij}, n)\\
+	\bseta_i &= (\bseta_{ij})_{j \neq i} = \bA_i \bgamma_i \in \R^{n(p-1)},\\
+    \text{where }\bA_i&= \text{diag}(\bA_{ij})_{j \neq i} \in \R^{n(p-1)  \times \sum_{\substack{j \neq i}} k_{ij} }.
 	\end{aligned}
-\end{equation}    
-Thus Model~(\ref{eq:flm3}) can be represented as
+\end{equation}
+We want to put the sparsity penalty on the $\bseta_i$. Then Model~\ref{eq:flm3} can be expressed as the following optimization problem, which is a generalized lasso problem. 
+%In order to incorporate $\bseta_{ij}$ into the model~\ref{eq:flm3}, we need to represent $\bgamma_{ij}$ as a transformation of $\bseta_{ij}$. 
+
+
+
+%When $\bA_{ij}$ is full row rank (i.e. $k_{ij} \geq n$), there exists an upper triangle matrix $\bM_{ij} \in \R^{n \times n}$, such that $\bM_{ij} \bA_{ij} = (\bI_n, \mathbf{0})$. Similarly, we denote the first $n$ rows of $\bgamma_{ij}$ as $\bgamma_{ij}^{(1)}$, and the left as $\bgamma_{ij}^{(2)}$. Thus, $\bgamma_{ij}^{(1)} = \bM_{ij} \bseta_{ij}$ and $\bgamma_{ij} = (\bM_{ij} \bseta_{ij}, \bgamma_{ij}^{(2)})$. 
+
+%When $\bA_{ij}$ is full column rank (i.e. $k_{ij} < n$), we can also find the pseudo inverse matrix $\bM_{ij} =(A^TA)^{-1}A^T  \in \R^{n \times n}$, such that, $\bM_{ij} \bA_{ij} = (\bI_{k_{ij}}, \mathbf{0})^T$. And we denote the first $k_{ij}$ rows of $\bM_{ij}$ as $\bM_{ij}^{(1)}$, and the left as $\bM_{ij}^{(2)}$. Then $\bgamma_{ij} = \bM_{ij}^{(1)}\bseta_{ij}$.
+
+%To be concise, we denote $\bgamma_{ij} = \bM_{ij}^* \bseta_{ij}^* = \begin{cases}
+%\begin{bmatrix}
+%\bM_{ij}  & \mathbf{0} \\
+%\mathbf{0} & \bI_{k_{ij} - n} \\
+%\end{bmatrix} \begin{bmatrix}
+%\bseta_{ij} \\
+%\bgamma_{ij}^{(2)} \\
+%\end{bmatrix}      & \quad \text{if } k_{ij} \geq n, \\
+%\bM_{ij}^{(1)}\bseta_{ij}  & \quad \text{otherwise. }\\
+%\end{cases}$. Then we have 
+%\begin{equation}
+%	\begin{aligned}
+%	&\bgamma_i = \bM_i^* \bseta_i^*, \\
+%	&\text{where } \bM_i^* = \text{diag} \{\bM_{ij}^*\}_{j \neq i} \in \R^{(\sum_{\substack{j \neq i}} k_{ij}) \times (\sum_{\substack{j \neq i}} k_{ij}^*)},\\ 
+%	&\bseta_i^* = (\bseta_{ij}^*)_{j \neq i} \in \R^{(\sum_{\substack{j \neq i}} k_{ij}^*) \times 1} \text{and } k_{ij}^* = \max (k_{ij}, n)\\
+%	\end{aligned}
+%\end{equation}    
 \begin{equation}
-    \label{eq:flm4}
-	\bX_i = \bU_i^T \bM_{i}^* \bseta_i^* + \bvarepsilon_i, i = 1, \cdots, p.
+    \label{eq:glars}
+    \begin{aligned}
+    \hat{\bgamma}_{i,L} &= \text{arg} \min_{\substack{\bgamma_i}} \frac{1}{2}\|\bX_i - \bU_i \bgamma_i\|_2^2 \\
+    \text{subject to } \|\bseta_i\|_1 &= \|\bA_i \bgamma_i\|_1 \leq t\\
+    \text{i.e. }\hat{\bgamma}_{i,L} &= \text{arg} \min_{\substack{\bgamma_i}} \frac{1}{2}\|\bX_i - \bU_i \bgamma_i\|_2^2 + \lambda \|\bA_i \bgamma_i\|_1\\
+    \end{aligned}
 \end{equation}
 
-Notice that $\bseta_i$ is a subset of $\bseta_i^*$. In order to have a sparse estimation of $\bseta_i$, we can apply Lasso or Dantzig selector in the Model~(\ref{eq:flm4}) to estimate $\bseta_i^*$ while the $l_1$ penalty is applied on $\bseta_i$ rather than $\bseta_i^*$. More specifically, for each $i$, the Lasso estimator, $\hat{\bseta}_{i,L}^*$, is given by
-\begin{equation}
-	\hat{\bseta}_{i,L}^* = \text{arg} \min_{\substack{\bseta^*}} \|\bX_i - \bU_i^T\bM_{i}^*\bseta_i^*\|_2^2 + \lambda \|\bseta_i\|_1
-\end{equation}
-Alternatively, for each $i$, the Dantzig selector estimator $\hat{\bseta}_{i,DS}^*$ is given by
-\begin{equation}
-    \begin{aligned}
-    \hat{\bseta}_{i,DS}^* &= \text{arg} \min_{\substack{\bseta_i^*}} \|\bseta_i\|_1 \\
-    &\text{Subject to } |(\bU_i^T\bM_{i}^*)_k^T(\bX_i - \bU_i^T\bM_{i}^*\bseta_i^*)| \leq \lambda,\\
-    &\text{where } (\bU_i^T\bM_{i}^*)_k \text{is the }k \text{th column of }\bU_i^T\bM_{i}^*, k = 1, \cdots, \sum_{\substack{j \neq i}}k_{ij}^*.
-    \end{aligned}
-\end{equation} 
+Moreover, if we want to control the sparsity of multiple derivatives of $\bbeta_{ij}(t)$, say we want both $\bbeta_{ij}^{(0)}(t) = 0$ and $\bbeta_{ij}^{(2)}(t) = 0$ in large area.
+
+There is a connection between Model~\ref{eq:glars} and fused lasso.
 
 \bibliographystyle{plain}
 \bibliography{dynamicgraph}

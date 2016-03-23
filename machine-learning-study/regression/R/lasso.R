@@ -27,3 +27,17 @@ cvfit = cv.glmnet(X, Y)
 plot(fit)
 plot(cvfit)
 print(fit)
+
+# 
+
+# high dimension case -----------------------------------------------------
+
+x=cbind(rep(0, 10), matrix(rnorm(10*10),10,10), rep(0, 10), 
+        matrix(rnorm(10*10),10,10), rep(0, 10), 
+        matrix(rnorm(10*10),10,10), rep(0, 10),
+        matrix(rnorm(10*10),10,10), rep(0, 10), 
+        matrix(rnorm(10*10),10,10), rep(0, 10))
+y=rnorm(10)
+
+fit1=glmnet(x,y)
+plot(fit1)
