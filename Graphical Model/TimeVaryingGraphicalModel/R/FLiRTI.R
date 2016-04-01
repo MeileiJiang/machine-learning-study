@@ -1,6 +1,6 @@
 #####################################################################################
 ## FLiRTI.R
-## Understand how to utilize B-spline.
+## Understand how to utilize B-spline by FLiRTI approach.
 ## Author: Meilei
 #####################################################################################
 library(splines)
@@ -19,12 +19,17 @@ Data = Toydata[,-11]
 time = unique(Toydata$Time)
 n = length(Toydata$Time)/length(time)
 
-grid = seq(0, 1, by = 0.1)
+grid = seq(0, 1, by = 0.01)
 S = 0.04
 L = 65
 # grid = time
 
 # bspline basis matrix
+
+B = cbind(splineDesign(knots = grid, x = time, ord = 1, outer.ok = TRUE))
+
+B = cbind(splineDesign(knots = grid, x = time, ord = 1, outer.ok = TRUE), splineDesign(knots = grid, x = time, ord = 2,outer.ok = TRUE))
+
 B = cbind(splineDesign(knots = grid, x = time, ord = 1, outer.ok = TRUE), splineDesign(knots = grid, x = time, ord = 2,outer.ok = TRUE), 
           splineDesign(knots = grid, x = time, ord = 3, outer.ok = TRUE), splineDesign(knots = grid, x = time, ord = 4,outer.ok = TRUE))
 
@@ -65,6 +70,10 @@ set = seq(0, 1, by = 0.005)
 # basis = cbind(bs(set, knots = grid, intercept = F, degree = 1), bs(set, knots = grid, intercept = F, degree = 2),
 #               bs(set, knots = grid, intercept = F, degree = 3))
 
+basis = cbind(splineDesign(knots = grid, x = set, ord = 1, outer.ok = TRUE))
+
+basis = cbind(splineDesign(knots = grid, x = set, ord = 1, outer.ok = TRUE), splineDesign(knots = grid, x = set, ord = 2, outer.ok = TRUE))
+              
 basis = cbind(splineDesign(knots = grid, x = set, ord = 1, outer.ok = TRUE), splineDesign(knots = grid, x = set, ord = 2, outer.ok = TRUE), 
               splineDesign(knots = grid, x = set, ord = 3, outer.ok = TRUE), splineDesign(knots = grid, x = set, ord = 4, outer.ok = TRUE))
 
@@ -92,14 +101,14 @@ gamma1 = as.matrix(coef.glmnet(fit1, s = S)[-1,1])
 
 
 
-# solve by FLiRTI ---------------------------------------------------------
+# solve by FLiRTI 
 
 V1 = U1 %*% Ap
 dim(V1)
 
 fit1.0 = glmnet(x = V1, y = Y1, family = "gaussian", intercept = F)
 
-eta1 = as.matrix(coef.glmnet(fit1.0, s = 0.09)[-1,1])
+eta1 = as.matrix(coef.glmnet(fit1.0, s = 0.01)[-1,1])
 
 gamma1 = Ap %*% eta1
 
@@ -135,11 +144,8 @@ g1 = ggplot(data = mbeta1, aes(x = set, y = value)) +
 
 # node 2 ------------------------------------------------------------------
 
-
 X2 = as.matrix(Data[,-2] )
 Y2 = as.matrix(Data[,2])
-
-
 
 
 checkEquals( length(time)*n, dim(X2)[1])
@@ -157,14 +163,19 @@ fit2 = glmnet(x = U2, y = Y2, family = "gaussian", intercept = F)
 
 gamma2 = as.matrix(coef.glmnet(fit2, s = S)[-1,1])
 
-# First order difference operator 
+# solve by FLiRTI 
 
-out2 = genlasso(y = Y2, X = U2, D = A)
-plot(out2)
+V2 = U2 %*% Ap
+dim(V2)
 
-# get the estimation of gamma -- coefficients of basis functions for beta(t) -------------------------------------------
+fit2.0 = glmnet(x = V2, y = Y2, family = "gaussian", intercept = F)
 
-gamma2 = coef.genlasso(out2, lambda = 70)$beta
+eta2 = as.matrix(coef.glmnet(fit2.0, s = 0.01)[-1,1])
+
+gamma2 = Ap %*% eta2
+
+
+
 
 # get the coeffiecient function beta(t)
 
@@ -218,10 +229,16 @@ fit3 = glmnet(x = U3, y = Y3, family = "gaussian", intercept = F)
 
 gamma3 = as.matrix(coef.glmnet(fit3, s = S)[-1,1])
 
-# First order difference operator 
+# solve by FLiRTI 
 
-out3 = genlasso(y = Y3, X = U3, D = A)
-plot(out3)
+V3 = U3 %*% Ap
+dim(V3)
+
+fit3.0 = glmnet(x = V3, y = Y3, family = "gaussian", intercept = F)
+
+eta3 = as.matrix(coef.glmnet(fit3.0, s = 0.01)[-1,1])
+
+gamma3 = Ap %*% eta3
 
 # get the estimation of gamma -- coefficients of basis functions for beta(t) -------------------------------------------
 
@@ -276,14 +293,16 @@ fit6 = glmnet(x = U6, y = Y6, family = "gaussian", intercept = F)
 
 gamma6 = as.matrix(coef.glmnet(fit6, s = S)[-1,1])
 
-# First order difference operator 
+# solve by FLiRTI 
 
-out6 = genlasso(y = Y6, X = U6, D = A)
-plot(out6)
+V6 = U6 %*% Ap
+dim(V6)
 
-# get the estimation of gamma -- coefficients of basis functions for beta(t) -------------------------------------------
+fit6.0 = glmnet(x = V6, y = Y6, family = "gaussian", intercept = F)
 
-gamma6 = coef.genlasso(out6, lambda = 210)$beta
+eta6 = as.matrix(coef.glmnet(fit6.0, s = 0.01)[-1,1])
+
+gamma6 = Ap %*% eta6
 
 # get the coeffiecient function beta(t)
 
