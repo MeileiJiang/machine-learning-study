@@ -9,10 +9,10 @@ library(ggplot2)
 library(igraph)
 library(dplyr)
 library(reshape2)
+library(genlasso)
 
-source("R/Simple_Case/2dexample.R")
-
-load("rdata/2dtoyexample1.Rdata")
+# load("rdata/2dtoyexample1.Rdata")
+load("rdata/2dtoyexample3.Rdata")
 
 Toydata %>% 
   group_by(Time) %>%
@@ -21,7 +21,7 @@ table(Toydata$Time)
 
 time = unique(Toydata$Time)
 
-S = 0.18
+S = 0.15
 
 # node 1 ------------------------------------------------------------------
 
@@ -52,3 +52,5 @@ g1 = ggplot(mbeta1, aes(x = time, y = value)) +
   labs(x = "time", title = "Coefficients of Node 1")
 g1
 
+a = trendfilter(beta12, ord = 1)
+plot(a, nlam = 2)

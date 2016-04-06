@@ -11,25 +11,27 @@ library(Matrix)
 library(mvtnorm)
 
 cfun = function(t){
-  if(t >= 0 & t <= 0.2) return(0.5 - 5*abs(t-0.1))
-  if(t >= 0.4 & t <= 0.6) return(-0.5 + 5*abs(t-0.5))
-  if(t > 0.8 & t <= 1) return(0.5 - 5*abs(t-0.9))
+  if(t >= 0 & t <= 0.2) return(min(1 - 10*abs(t-0.1), 0.5))
+  if(t >= 0.4 & t <= 0.6) return(max(-1 + 10*abs(t-0.5), -0.5))
+  if(t > 0.8 & t <= 1) return(min(1 - 10*abs(t-0.9), 0.5))
   return(0)
 }
 
-# grid = seq(0, 1, by = 0.01)
-# y = rep(0, length(grid))
-# 
-# for(i in 1:length(grid)){
-#   y[i] = cfun(grid[i])
-# }
-# 
-# c.df = data.frame( y, grid)
-# 
-# ggplot(data = c.df, aes(x = grid, y = y)) +
-#   geom_line(col = "blue") +
-#   scale_y_continuous(limits = c(-1,1)) +
-#   labs(x = "time", y = "partical correlation", title = "Partial correlation over time")
+grid = seq(0, 1, by = 0.01)
+y = rep(0, length(grid))
+
+for(i in 1:length(grid)){
+  y[i] = cfun(grid[i])
+}
+
+c.df = data.frame( y, grid)
+
+ggplot(data = c.df, aes(x = grid, y = y)) +
+  geom_line(col = "blue") +
+  scale_y_continuous(limits = c(-1,1)) +
+  labs(x = "time", y = "partical correlation", title = "Partial correlation over time")
+
+save(c.df, file = "R/Simple_Case/2dexample.RData")
 
 Omegafun = function(t){
   M = matrix(c(1,       cfun(t),   
@@ -62,4 +64,18 @@ Data = simulation(time = time, n = 100)
 
 colnames(Data) = c(paste0("X",c(1:2)),"Time")
 Toydata = data.frame(Data)
-save(Toydata, file = "rdata/2dtoyexample1.Rdata")
+save(Toydata, file = "rdata/2dtoyexample3.Rdata")
+
+time = seq(0, 1, by = 1/33)
+Data = simulation(time = time, n = 100)
+
+colnames(Data) = c(paste0("X",c(1:2)),"Time")
+Toydata = data.frame(Data)
+save(Toydata, file = "rdata/2dtoyexample2.Rdata")
+
+time = seq(0, 1, by = 0.005)
+Data = simulation(time = time, n = 1)
+
+colnames(Data) = c(paste0("X",c(1:2)),"Time")
+Toydata = data.frame(Data)
+save(Toydata, file = "rdata/2dtoyexample3.Rdata")
