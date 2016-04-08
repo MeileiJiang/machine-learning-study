@@ -92,7 +92,7 @@ fit1 = glmnet(x = U1, y = Y1, family = "gaussian", intercept = F)
 cv.glmnet(x = U1, y = Y1, family = "gaussian", intercept = F)
 
 
-gamma1 = as.matrix(coef.glmnet(fit1, s =0.05)[-1,1])
+gamma1 = as.matrix(coef.glmnet(fit1, s =0.08)[-1,1])
 
 beta12 =  basis %*% gamma1[1:dim(B)[2],1]
 
@@ -123,13 +123,13 @@ D1 = getDtf(dim(U1)[2], ord =0)
 D2 = getDtf(dim(U1)[2], ord =1)
 D = rbind(D0, D2)
 
-out1 = fusedlasso1d(y = Y1, X = U1, gamma =  0.7)
+out1 = fusedlasso1d(y = Y1, X = U1, gamma =  1)
 out1 = trendfilter(y = Y1, X = U1, ord = 0.7)
 
 plot(out1)
 
 
-gamma1 = coef.genlasso(out1, lambda = 20)$beta
+gamma1 = coef.genlasso(out1, lambda = 9)$beta
 eta1 = basis %*% gamma1
 plot( eta1, type = "l")
 
