@@ -19,30 +19,62 @@ Data = Toydata[,-11]
 time = unique(Toydata$Time)
 n = length(Toydata$Time)/length(time)
 
-grid = seq(0, 1, by = 0.1)
+
+delta = 0.1
+grid = seq(0, 1, by = delta)
+
 S = 0.04
 L = 65
 # grid = time
 
+# # bspline basis matrix
+# B = cbind(splineDesign(knots = grid, x = time, ord = 1, outer.ok = TRUE), splineDesign(knots = grid, x = time, ord = 2,outer.ok = TRUE), 
+#           splineDesign(knots = grid, x = time, ord = 3, outer.ok = TRUE), splineDesign(knots = grid, x = time, ord = 4,outer.ok = TRUE))
+# 
+# # B = cbind(bs(time, knots = grid, degree = 1, intercept = F), bs(time, knots = grid, degree = 2, intercept = F),
+# # bs(time, knots = grid, degree = 3, intercept = F))
+# dim(B)
+# 
+# # First order difference operator 
+# DifferenceOperator = function(B, time){
+#   DB = matrix(nrow = dim(B)[1]-1, ncol = dim(B)[2])
+#   for(t in 1:dim(DB)[1]){
+#     DB[t,] = (B[t+1,] - B[t])#/(time[t+1] - time[t])
+#   }
+#   return(DB)
+# } 
+# D1B = DifferenceOperator(B, time)
+# D2B = DifferenceOperator(D1B, time)
+# D3B = DifferenceOperator(D2B, time)
+
 # bspline basis matrix
-B = cbind(splineDesign(knots = grid, x = time, ord = 1, outer.ok = TRUE), splineDesign(knots = grid, x = time, ord = 2,outer.ok = TRUE), 
-          splineDesign(knots = grid, x = time, ord = 3, outer.ok = TRUE), splineDesign(knots = grid, x = time, ord = 4,outer.ok = TRUE))
+b1 = splineDesign(knots = grid, x = time, ord = 1, outer.ok = TRUE)
+d1b1 = matrix(0, nrow = dim(b1)[1], ncol = dim(b1)[2])
+d2b1 = d1b1
+d3b1 = d2b1
 
-# B = cbind(bs(time, knots = grid, degree = 1, intercept = F), bs(time, knots = grid, degree = 2, intercept = F),
-# bs(time, knots = grid, degree = 3, intercept = F))
-dim(B)
+b2 = splineDesign(knots = grid, x = time, ord = 2, outer.ok = TRUE)
+d1b2 = (b1[,-dim(b1)[2]] - b1[,-1])/delta
+d2b2 = matrix(0, nrow = dim(b2)[1], ncol = dim(b2)[2])
+d3b2 = d2b2
 
-# First order difference operator 
-DifferenceOperator = function(B, time){
-  DB = matrix(nrow = dim(B)[1]-1, ncol = dim(B)[2])
-  for(t in 1:dim(DB)[1]){
-    DB[t,] = (B[t+1,] - B[t])/(time[t+1] - time[t])
-  }
-  return(DB)
-} 
-D1B = DifferenceOperator(B, time)
-D2B = DifferenceOperator(D1B, time)
-D3B = DifferenceOperator(D2B, time)
+b3 = splineDesign(knots = grid, x = time, ord = 3, outer.ok = TRUE)
+d1b3 = (b2[,-dim(b2)[2]] - b2[,-1])/delta
+d2b3 = (d1b2[,-dim(d1b2)[2]] - d1b2[,-1])/delta
+d3b3 = matrix(0, nrow = dim(b3)[1], ncol = dim(b3)[2])
+
+b4 = splineDesign(knots = grid, x = time, ord = 4, outer.ok = TRUE)
+d1b4 = (b3[,-dim(b3)[2]] - b3[,-1])/delta
+d2b4 = (d1b3[,-dim(d1b3)[2]] - d1b3[,-1])/delta
+d3b4 = (d2b3[,-dim(d2b3)[2]] - d2b3[,-1])/delta
+
+
+B = cbind(b1, b2, b3, b4)
+
+d1B = cbind(d1b1, d1b2, d1b3, d1b4)
+d2B = cbind(d2b1, d2b2, d2b3, d2b4)
+d3B = unique(cbind(d3b1, d3b2, d3b3, d3b4))
+
 
 Rowbdiag = function(M){
   newM = NULL
@@ -55,8 +87,16 @@ Rowbdiag = function(M){
   return(newM)
 }
 
-A = Rowbdiag(B)
-A = Rowbdiag(rbind(B, D2B))
+w0 = 0.05; w1 = 5
+
+
+#A = Rowbdiag(B)
+
+A = Rowbdiag(rbind(w0*B, w1*d1B))
+
+A0 = rbind(w0*B, d1B)
+A = as.matrix(bdiag(A0, A0, A0, A0, A0, A0, A0, A0, A0))
+
 
 ## Set the parameter for plots
 
@@ -88,7 +128,7 @@ fit1 = glmnet(x = U1, y = Y1, family = "gaussian", intercept = F)
 
 gamma1 = as.matrix(coef.glmnet(fit1, s = S)[-1,1])
 
-
+plot(gamma1)
 
 # solve by generalized lasso ---------------------------------------------------------
 
@@ -96,9 +136,19 @@ gamma1 = as.matrix(coef.glmnet(fit1, s = S)[-1,1])
 out1 = genlasso(y = Y1, X = U1, D = A)
 plot(out1)
 
-# get the estimation of gamma -- coefficients of basis functions for beta(t) -------------------------------------------
+gamma1 = coef.genlasso(out1, lambda = 60)$beta
+eta12 = B %*% gamma1[1:dim(B)[2],1]
+plot(eta12, type = "l")
 
-gamma1 = coef.genlasso(out1, lambda = 1.89)$beta
+
+# solve by fused lasso ----------------------------------------------------
+
+out1.2 = fusedlasso1d(y = Y1, X = U1, gamma = 1)
+
+plot(out1.2)
+
+gamma1 = coef.genlasso(out1.2, lambda = 35)$beta
+
 
 # get the coeffiecient function beta(t)
 
@@ -127,7 +177,7 @@ g1 = ggplot(data = mbeta1, aes(x = set, y = value)) +
                      labels = c(-0.5,-0.4,-0.3,-0.2,-0.1,0)) +
   labs(x = "time", title = "Coefficient of Node 1 by basis expansion (B-spline)")
 
-
+g1
 # node 2 ------------------------------------------------------------------
 
 
@@ -276,9 +326,16 @@ gamma6 = as.matrix(coef.glmnet(fit6, s = S)[-1,1])
 out6 = genlasso(y = Y6, X = U6, D = A)
 plot(out6)
 
-# get the estimation of gamma -- coefficients of basis functions for beta(t) -------------------------------------------
 
 gamma6 = coef.genlasso(out6, lambda = 210)$beta
+
+# solve by fused lasso ----------------------------------------------------
+
+out6.2 = fusedlasso1d(y = Y6, X = U6, gamma = 1)
+
+plot(out6.2)
+
+gamma6 = coef.genlasso(out6.2, lambda = 350)$beta
 
 # get the coeffiecient function beta(t)
 
@@ -308,7 +365,7 @@ g6 = ggplot(data = mbeta6, aes(x = set, y = value)) +
                      labels = c(-0.5,-0.4,-0.3,-0.2,-0.1,0)) +
   labs(x = "time", title = "Coefficient of Node 6 by basis expansion (B-spline)")
 
-
+g6
 # save the plot -----------------------------------------------------------
 
 

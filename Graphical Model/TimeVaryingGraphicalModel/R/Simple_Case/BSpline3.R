@@ -109,7 +109,7 @@ w2 = 1
 w3 = 0.1
 
 A = rbind(w0*B, w1*d1B, w2*d2B)
-
+A = rbind(w0*B, w1*d1B)
 A = rbind(w0*B, w3*d3B)
 
 # Ap = solve(t(A)%*% A ) %*% t(A)
@@ -120,7 +120,7 @@ out1 = genlasso(y = Y1, X = U1, D = A)
 plot(out1)
 
 
-gamma1 = coef.genlasso(out1, lambda = 5)$beta
+gamma1 = coef.genlasso(out1, lambda = 3.3)$beta
 eta1 = basis %*% gamma1
 plot( eta1, type = "l")
 
