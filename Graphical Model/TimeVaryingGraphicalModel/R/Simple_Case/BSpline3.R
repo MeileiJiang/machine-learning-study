@@ -14,8 +14,8 @@ library(Matrix)
 library(RUnit)
 require(stats); require(graphics)
 
-load("rdata/2dtoyexample4.Rdata")
-load("R/Simple_Case/2dexample2.RData")
+load("rdata/2dtoyexample3.Rdata")
+load("R/Simple_Case/2dexample.RData")
 
 Data = Toydata[,-3]
 time = unique(Toydata$Time)
@@ -120,7 +120,7 @@ out1 = genlasso(y = Y1, X = U1, D = A)
 plot(out1)
 
 
-gamma1 = coef.genlasso(out1, lambda = 3.3)$beta
+gamma1 = coef.genlasso(out1, lambda = 40)$beta
 eta1 = basis %*% gamma1
 plot( eta1, type = "l")
 

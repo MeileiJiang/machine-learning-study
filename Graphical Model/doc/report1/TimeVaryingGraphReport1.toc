@@ -1,0 +1,11 @@
+\beamer@endinputifotherversion {3.36pt}
+\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
+\beamer@sectionintoc {2}{Sparse Gaussian Graphical Model Estimation}{16}{0}{2}
+\beamer@subsectionintoc {2}{1}{Neighborhood Selection Approach}{21}{0}{2}
+\beamer@subsectionintoc {2}{2}{Penalized Likelihood Estimation Approach}{29}{0}{2}
+\beamer@subsectionintoc {2}{3}{Constrained $\ell _1$ Minimization Approach}{35}{0}{2}
+\beamer@sectionintoc {3}{Heterogeneous Data And Joint Estimation Of Multiple Graphs}{38}{0}{3}
+\beamer@sectionintoc {4}{Time Varying Graphical Model}{46}{0}{4}
+\beamer@subsectionintoc {4}{1}{Varying Coefficient Model}{49}{0}{4}
+\beamer@subsectionintoc {4}{2}{Functional Coefficient Model}{54}{0}{4}
+\beamer@sectionintoc {5}{Simulation Study}{71}{0}{5}
