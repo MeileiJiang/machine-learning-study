@@ -1,0 +1,14 @@
+Universe = vanilla
+Executable = /usr/local/bin/matlab
+
+Arguments = -r run_kernel_lasso(%(n)d)
+
+Environment = LD_LIBRARY_PATH=/usr1/mladenk/local/lib:/usr1/mladenk/local/lib64:/usr1/mladenk/local/atlas/lib:/afs/cs.cmu.edu/misc/matlab/amd64_fc3/7.5/lib/matlab7/bin/glnxa64:$LD_LIBRARY_PATH;MPLCONFIGDIR=/usr1/mladenk/.matplotlib;RHOME=/usr1/mladenk/local/lib64/R
+
+Log = /usr1/mladenk/projects/jumps/new_exper/condor_out/log_kernel_lasso_%(n)d
+Error = /usr1/mladenk/projects/jumps/new_exper/condor_out/err_kernel_lasso_%(n)d
+Output = /usr1/mladenk/projects/jumps/new_exper/condor_out/out_kernel_lasso_%(n)d
+
+Queue 1
+
+
