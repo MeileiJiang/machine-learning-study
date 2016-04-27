@@ -18,5 +18,5 @@ n = length(Toydata$Time)/length(time)
 X1 = as.matrix(Data[,-1] )
 Y1 = as.matrix(Data[,1])
 
-a = trendfilter(y = Y1,  ord = 3)
+a = trendfilter(y = Y1, ord = 2)
 plot(a, nlam = 2)

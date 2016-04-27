@@ -54,6 +54,7 @@ B = cbind(b1, b2, b3, b4)
 
 d1B = cbind(d1b1, d1b2, d1b3, d1b4)
 d2B = cbind(d2b1, d2b2, d2b3, d2b4)
+d3B1 = cbind(d3b1, d3b2, d3b3, d3b4)
 d3B = unique(cbind(d3b1, d3b2, d3b3, d3b4))
 
 
@@ -61,7 +62,7 @@ d3B = unique(cbind(d3b1, d3b2, d3b3, d3b4))
 
 checkEquals(dim(B),dim(d1B)) 
 checkEquals(dim(B),dim(d2B)) 
-checkEquals(dim(B),dim(d3B)) 
+checkEquals(dim(B),dim(d3B1)) 
 
 # # First order difference operator 
 # DifferenceOperator = function(B, time){
@@ -120,7 +121,7 @@ out1 = genlasso(y = Y1, X = U1, D = A)
 plot(out1)
 
 
-gamma1 = coef.genlasso(out1, lambda = 40)$beta
+gamma1 = coef.genlasso(out1, lambda = 60)$beta
 eta1 = basis %*% gamma1
 plot( eta1, type = "l")
 
