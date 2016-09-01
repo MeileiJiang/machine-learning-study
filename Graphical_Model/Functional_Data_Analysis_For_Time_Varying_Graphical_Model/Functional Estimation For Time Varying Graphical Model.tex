@@ -1,0 +1,386 @@
+%----------------------------------------------------------------------------------------
+%	DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+\documentclass[11pt]{article}
+
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{cleveref}
+\usepackage[round]{natbib}
+
+
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+
+\usepackage{epsfig}
+\usepackage{amscd}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{enumerate}
+\usepackage{tikz}
+\usepackage{bbm}
+
+
+\usepackage[top=1.5in,bottom=1.5in,right=1.5in, left=1.5in]{geometry}
+
+\captionsetup[subfigure]{subrefformat=simple,labelformat=simple}
+\renewcommand\thesubfigure{(\alph{subfigure})}
+
+
+%new command
+%% Blackboard bold letters
+\newcommand{\N}{\mathbb N}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\C}{\mathbb C}
+
+%% Bold font letters
+\newcommand{\bX}{\mathbf X}
+\newcommand{\bY}{\mathbf Y}
+\newcommand{\bA}{\mathbf A}
+\newcommand{\bB}{\mathbf B}
+\newcommand{\bM}{\mathbf M}
+\newcommand{\bI}{\mathbf I}
+\newcommand{\bU}{\mathbf U}
+\newcommand{\bW}{\mathbf W}
+
+\newcommand{\be}{\mathbf e}
+\newcommand{\bx}{\mathbf x}
+\newcommand{\by}{\mathbf y}
+%% bold Greek symbols
+\newcommand{\balpha}{{\boldsymbol{\alpha}}}
+\newcommand{\bbeta}{{\boldsymbol{\beta}}}
+\newcommand{\bmu}{{\boldsymbol{\mu}}}
+\newcommand{\bdeta}{{\boldsymbol{\eta}}}
+\newcommand{\btheta}{{\boldsymbol{\theta}}}
+\newcommand{\bseta}{\boldsymbol{\eta}}
+\newcommand{\brho}{{\boldsymbol{\rho}}}
+\newcommand{\bepsilon}{\boldsymbol{\epsilon}}
+\newcommand{\bvarepsilon}{\boldsymbol{\varepsilon}}
+\newcommand{\bgamma}{\boldsymbol{\gamma}}
+\newcommand{\bomega}{{\boldsymbol{\omega}}}
+
+\newcommand{\bOmega}{{\boldsymbol{\Omega}}}
+\newcommand{\bSigma}{{\boldsymbol{\Sigma}}}
+\newcommand{\bTheta}{{\boldsymbol{\Theta}}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\Exp}{{\mathbb{E}}}
+\newcommand{\ind}{{\mathbbm{1}}}
+\newcommand{\RN}[1]{%
+  \textup{\uppercase\expandafter{\romannumeral#1}}%
+}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\author{Meilei Jiang, Yufeng Liu\\
+    Department of Statistics and Operations Research\\
+		University of North Carolina at Chapel Hill}
+\title{Functional Sparse Estimation of Time Varying Graphical Model}
+
+\maketitle
+
+\section{Introduction}
+
+Graphical models are quite useful in many domains to uncover the dependence structure among observed variables. Typically, we consider a $p$-dimensional multivariate normal distributed random variable 
+$$ \bX = (X_1, \cdots, X_p) \sim \N(\mathbf{0}, \bSigma),$$ 
+where $p$ is the number of features. Then a useful graph of these $p$ features can be constructed based on there conditional dependence structure. More precisely, we can construct a Gaussian graphical model
+$$\begin{aligned}
+&\mathcal{G} = (V, E), \text{ where } V = \{ 1, \cdots, p\}\text{ is the set of nodes, }\\
+&\text{ and } E = \left\{ (j, l) | X_j \text{ is conditionally dependent with } X_l, \text{given } X_{V/\{j, l\}}\right\}.
+\end{aligned}$$
+     
+
+Let $\bOmega = \bSigma^{-1} = (\omega_{j,l})_{1\leq j, l \leq p}$ be the precision matrix. Then $X_j$ and $X_l$ are conditionally dependent given other features if and only if $\omega_{jl} = 0$. Therefore, estimating the covariance matrix and precision matrix of $X$ is equivalent to estimate the structure of Gaussian graphical model $\mathcal{G}$. More discussion can be found in \citep{lauritzen1996graphical}.
+
+\subsection{Estimation Sparse Precision Matrix $\bOmega$}
+
+Given a random sample $\bX^{(1)}, \cdots,\bX^{(n)}$ of $\bX$, we aim to estimate $\bOmega$ and recover its support, i.e. the corresponding undirected Gaussian graph. When $n > p$, a nature estimator of $\bOmega$ can be $\hat{\bOmega}_n = \hat{\bSigma}_n^{-1}$, where $\hat{\bSigma}_n = \sum_{\substack{k = 1}}^{n} (\bX^{(k)} - \bar{\bX}_n)(\bX^{(k)} - \bar{\bX}_n)'$ is the sample covariance matrix. In the case $n < p$, which is quite common in the many applications, the estimation of $\bOmega$ is much more challenging since  $\hat{\bSigma}_n$ is no longer invertible.
+
+There are lots of literatures discussing about the estimation of sparse precision matrix $\bOmega$ in high dimension low sample size settings, i.e. $p > n$. Generally speaking, there are three main approaches. 
+\begin{enumerate}
+	\item \textbf{Covariance selection approach.} 
+	There is a connection between linear regression and prediction matrix $\bOmega$:
+	\begin{equation}
+	\label{eq:regress1}
+	\bX_j = \bX_{-j} \bbeta_j + \bvarepsilon_j = \sum_{\substack{l \neq j}} \bX_l \beta_{jl} + \bvarepsilon_j
+	\end{equation}
+    It could be shown that $\beta_{jl} = \omega_{jl}/\omega_{jj}$. Thus estimating $\bbeta_j$ can identify the support of $i$th row of $\bOmega$. \cite{meinshausen2006high} applied LASSO penalty \citep{tibshirani1996regression}  on multivariate regression~\ref{eq:regress1} to estimate the support of $\bOmega$ row by row. \cite{peng2012partial} considered a joint sparse regression to estimate the support of $\bOmega$ together through an active-shooting algorithm. \cite{yuan2010high} applied Danzig selector \citep{candes2007dantzig} to the problem~\ref{eq:regress1} to estimate each column of $\bOmega$.
+    
+	\item \textbf{Penalized likelihood approach.}
+	Another nature way is to estimate $\bOmega$ is the penalized likelihood approach. The log-likelihood of the parameters in $\bOmega$ is as following:
+	\begin{equation}
+		\label{eq:mle}
+		l(\bX^(i), 1 \leq i \leq n|\bOmega) = -\text{tr}(\bOmega \hat{\bSigma}_n) + \log|\bOmega|
+	\end{equation}
+	In order to have a sparse estimation of $\bOmega$, different penalized likelihood estimator are considered. \cite{yuan2007model} proposed the \emph{max-det problem} to solve the LASSO-type estimator.
+	\begin{equation}
+	\label{eq:lassoOmega}
+	\hat{\bOmega}_L = \argmin \text{tr}(\bOmega \hat{\bSigma}_n) - \log|\bOmega| + \lambda \|\bOmega\|_1
+	\end{equation}
+	and the non-negative garrote-type estimator. 
+	\begin{equation}
+	\label{eq:garroteOmega}
+	\begin{aligned}
+	 	\hat{\bOmega}_G &= \argmin \text{tr}(\bOmega \hat{\bSigma}_n) - \log|\bOmega| + \lambda \sum_{\substack{j \neq i}} \frac{\omega_{jl}}{\tilde{\omega}_{jl}} \\
+	 	\text{subject to }& \frac{\omega_{jl}}{\tilde{\omega_{jl}}} \geq 0, \bOmega \text{ p.d.}\\
+	\end{aligned}
+	\end{equation}
+	\cite{banerjee2008model} used a block coordinate descent algorithm to solve (\ref{eq:lassoOmega}). And then \cite{friedman2008sparse} proposed the \emph{graphical lasso} algorithm for (\ref{eq:lassoOmega}) based on least square lasso type estimator, which is simple and fast. \cite{rothman2008sparse} proposed the sparse permutation invariant covariance estimator (SPICE) which could extend to the $\ell_q$-type penalized likelihood estimator. \cite{fan2009network}, \cite{lam2009sparsistency} studied the penalized likelihood estimator with the smoothly clipped absolute deviation (SCAD) penalty and the adaptive LASSO penalty.
+	
+	\item \textbf{$\ell_1$ constrained minimization approach.}
+	\cite{cai2011constrained} performed a constrained $\ell_1$ minimization approach to estimate sparse precision matrix (CLIME). 
+	\begin{equation}
+	\label{eq:clime}
+	\begin{aligned}
+	\hat{\bOmega}_{C} &= \argmin \|\bOmega\|_1 \\
+	\text{subject to }& \|\bOmega \hat{\bSigma} - \bI \|_{\infty} \leq \lambda_n\\
+	\end{aligned}
+	\end{equation}
+	\cite{cai2016estimating} proposed adaptive constrained $\ell_1$ minimization estimator (ACLIME), which achieved the optimal minimax rate of convergence. 
+\end{enumerate}
+  
+ 
+\subsection{Heterogeneous Data And Time Varying Graphical Model}
+The methods aforementioned focus on estimating a single Gaussian graph by assuming samples are identically distributed. However, in many applications it is more realistic to assume that data are heterogeneous due to batch effects or latent factors. \cite{guo2011joint} reparameterized the off-diagonal entry $\omega_{jl} = \theta_{jl} \gamma_{jl}^{k}$ and estimated them through a penalized likelihood with the hierarchical penalty on common structures $\theta_{jl}$ and individual structure$\gamma_{jl}^{k}$. \cite{danaher2014joint} propose the \emph{joint graphical lasso}, to estimate multiple graphical models corresponding to distinct but related conditions. The \emph{joint graphical lasso} utilized fussed lasso and group lasso on log-likelihood to force similarity among graphs. \cite{lee2015joint} proposed a method to estimate the common structure and unique structure through the constrained $\ell_1$ minimization.
+
+In many cases the sample indexes have orders, e.g. time, and the corresponding graphs evolve through the order. In such cases it could be quite interesting to estimate a time varying graphical model.
+\begin{equation}
+	\label{eq:timevarygraph}
+	\bX(t) \sim \N(\mathbf{0}, \bSigma(t))
+\end{equation}
+\cite{zhou2010time} developed a nonparametric framework for estimating time varying graphical model by kernel smoothing and $\ell_1$ panelty. Zhou's model assumed that the observations $X^t$ are independent and changed smoothly. 
+\begin{equation}
+	\label{eq:kernel_likelihood}
+	\begin{aligned}
+	\hat{\bOmega}(\tau) &= \argmin_{\bOmega} \left\{ \text{tr}(\bOmega \hat{\bSigma}(\tau)) - \log|\bOmega| + \lambda\|\bSigma^{-}\|_1 \right\}\\
+	\text{where }& \hat{\bSigma}(\tau) = \sum_i \omega_i^{\tau} \bX^i (\bX^i)', \text{and }\omega_i^{\tau} = \frac{K_h(t_i - \tau)}{\sum_{i'} K_h(t_{i'}- \tau)} \\
+	\end{aligned}
+\end{equation}
+\cite{lu2015post} proposed a dynamic nonparanormal graphical model, which is more robust, by estimating a weighted Kendall's tau correlation matrix. These approaches generated estimation of similar graphs by weighting the samples among different times.
+
+
+
+\subsection{Varying Coefficient Model And Sparse Derivatives}
+Considering the samples collected from different time points as longitudinal data and estimating the time varying network from the viewpoint of regression approach, we are looking at the following model
+\begin{equation}
+\label{eq:varycoefmodel}
+X_j(t) = \bX_{-j}'(t) \bbeta_j(t) + \varepsilon_j(t) = \sum_{\substack{l\neq j}} X_l(t) \beta_{jl}(t) + \varepsilon_j(t).
+\end{equation}
+Model~(\ref{eq:varycoefmodel}) is in the form of the varying coefficient model~\citep{cleveland1992local, hastie1993varying}. There are lots of literature studying varying coefficient model
+\begin{equation}
+\label{eq:varycoefmodel0}
+Y(t) = X(t)^T \bbeta(t) + \varepsilon(t) 
+\end{equation}
+A good overview of the varying coefficient model study was given by~\cite{fan2008statistical}. For the longitude data, there are two major approaches to estimate Model~(\ref{eq:varycoefmodel0}). One approach is local kernel polynomial smoothing~\citep{fan1999statistical, wu2000kernel}. Another approach is basis expansion~\citep{huang2002varying, huang2004polynomial}.
+
+Assume that we collect sample at $t_1, \cdots, t_n$, denote $X_j^i = X_j(t_i)$. Following the kernel polynomial smoothing approach, \cite{kolar2009sparsistent, kolar2010estimating, kolar2011time, kolar2012estimating} proposed a local linear regression approach with ``kernel $\ell_1$" penalty  to estimate the smoothly varying graph,
+\begin{equation}
+	\label{eq:smoothgraph}
+	\hat{\bbeta}_j(\tau) = \argmin_{\substack{\bbeta \in \R^{p-1}}} \sum_i(X_j^i - \sum_{\substack{l\neq j}} X_l^i \beta_l)^2 \omega_i^{\tau} + \lambda|\bbeta|_1
+\end{equation}
+and total variation penalty to estimate graph with jumps. 
+\begin{equation}
+	\label{eq::jumpgraph}
+	\begin{aligned}
+	\left\{ \hat{\bbeta}_j(t_1), \cdots, \hat{\bbeta}_j(t_n) \right\} = \argmin_{\substack{\bbeta(t_i), i \leq n}} &\sum_i(X_j^i - \sum_{\substack{l\neq j}} X_l^i \beta_l(t_i))^2  \\
+	& + \lambda_1 \sum_{i}|\bbeta(t_i)|_1 + \lambda_2 \sum_{i = 2}^n|\bbeta(t_i) - \bbeta(t_{i-1})|_1
+	\end{aligned}
+\end{equation}
+
+Current literatures of time varying networks mostly follows this approach. There are good reasons for this approach since the node $X_j$ is indeed locally linearly dependent with other nodes $\bX_{-j}$. However, the estimation $\hat{\bbeta}_j(t)$ are usually not smooth over time. While current works focus on correctly variable selection locally, our approach focus on both variable selection and estimating the function of $\bbeta(t)$. Our method of estimating Model~(\ref{eq:varycoefmodel}) follows basis expansion approach. To best of our knowledge, there is no work following this approach to estimate time varying networks.
+
+Moreover, in order to estimate a sparse graph, we need to gain sparse functional coefficient $\bbeta(t)$. Based on the idea of FLiRTI in James, Wang and Zhu's paper~\cite{james2009functional}, we put penalty on the derivative matrices of $\bbeta(t)$. \cite{kim2009ell_1} also put the $l_1$ penalty on derivative of coefficient function in the trend filtering problem. \cite{tibshirani2014adaptive} applied the generalized lasso \citep{tibshirani2011solution} to solve the optimization problem in the trendfilter. We will apply ADMM algorithm to solve our optimization problem. 
+
+
+\section{Methodology}
+
+\subsection{Functional Undirected Graph}
+Consider $p$ smooth functional continuous variables $\{ X_1(t), X_2(t) \cdots, X_p(t)\}$ on the 'time' domain $\mathcal{T}$. On each $t$, we assume
+$$ (X_1(t), X_2(t) \cdots, X_p(t)) \sim \N(\mathbf{0}, \bSigma(t)). $$ 
+Define the undirected graph 
+\begin{equation}
+	\label{eq:funcgraph}
+	\begin{aligned}
+	G(t) &= \left\{ V, E(t) \right\},\text{ where } V = \left\{1,\cdots, p\right\},\\
+	\text{ and } E(t) &= \left\{ (j,l) \in V^2 : \text{Cov} \left[ X_j(t), X_l(t)| X_k(t), k \neq j,l \right] \neq 0, j \neq l \right\}.\\
+	\end{aligned}
+\end{equation}
+
+Namely, $G(t)$ is the Gaussian graphical model at each $t$. This model is quite flexible, which allows $G(t)$ evolve over time and includes the time dependence. Assume that data are observed at $t_1, \cdots, t_n$ and at each time point $t$ we have $n_{t}$ samples.
+
+\subsection{Functional Nearest Neighborhood Selection}
+
+Assuming data are collected at $t_1, \cdots, t_n$, and there are $n_t$ replicates at each time point $t$. Consider the following functional coefficient model 
+\begin{equation} 
+	\label{eq:flm}
+    \begin{aligned}
+    X_j^r(t) &= {\bX_{-j}^r(t)}^T \bbeta_j(t) + \varepsilon_j^r(t) = \sum_{\substack{l\neq j}} X_l^r(t) \beta_{jl}(t) + \varepsilon_j^r(t),\\
+    \text{ where }\bX_{-j}^r(t) &= (X_l^r(t))_{\substack{l \neq j}} \in \R^{(p-1) \times 1}, r = 1, \cdots, n_t, t = t_1, \cdots, t_n, j = 1, \cdots, p.
+    \end{aligned}
+\end{equation}
+Moreover, for each $t$, let $\bX_j(t) = (X_j^1(t), \cdots, X_j^{n_t}(t))^T \in \R^{n_t \times 1}, \bvarepsilon(t) = (\bvarepsilon_j^1(t), \cdots, \bvarepsilon_j^{n_t}(t))^T \in \R^{n_t \times 1}$, then Model~(\ref{eq:flm}) can be represented as
+\begin{equation}
+	\label{eq:flm1}
+	\begin{aligned}
+	\bX_j(t) &= {\bX_{-j}(t)}' \bbeta_j(t) + \bvarepsilon_j(t)\\
+			 &= \sum_{\substack{l\neq j}} \bX_l(t) \beta_{jl}(t) + \bvarepsilon_j(t),\\
+	\end{aligned}
+\end{equation}
+
+
+For each functional coefficient $\beta_{jl}(t)$, we consider the basis expansion $\bB_{jl}(t) = (B_{jl1}(t), \cdots, B_{jlk_{jl}}(t) )$: 
+		$$\beta_{jl}(t) = \sum_{\substack{s=1}}^{k_{jl}} B_{jls}(t) \gamma_{jls} + e_{jl}(t) = \bB_{jl}(t) \bgamma_{jl} + e_{jl}(t)$$
+Then we get the functional coefficient vector $\bbeta_j(t) = \bB(t) \bgamma_j + \be_j(t) = \left(\beta_{jl}|j \neq l \right) \in \R^{p-1}$, where $\bB(t) = \text{diag}\left\{\bB_{jl}(t)\right\} \in \R^{(p-1)\times \sum_{\substack{l \neq j}}k_{jl} }, \bgamma_j = (\bgamma_{jl})_{l \neq j} \in \R^{\sum_{\substack{l \neq j}}k_{jl} \times 1}, \be(t) = (\be_{jl}|j \neq l) \in \R^{p-1}.$	
+
+Thus Equation~(\ref{eq:flm1}) can be represented as
+\begin{equation}
+	\label{eq:flm2}
+	\begin{aligned}
+	\bX_j(t) &= \sum_{\substack{l \neq j}} \sum_{\substack{s=1}}^{k_{jl}} \bX_l(t) B_{jls}(t) \gamma_{jls} + \tilde{\bvarepsilon}(t) \\
+	         &= \bX_{-j}(t) \bB_j(t)\bgamma_j + \tilde{\bvarepsilon}(t) \\
+	         &= \bU(t)\bgamma_j + \tilde{\bvarepsilon}(t) \\
+	\text{where }\bU(t)      &= \bX_{-j}(t) \bB_j(t)\in \R^{\sum_{t = 1}^{n}n_t \times \sum_{\substack{j \neq i}}k_{jl}},\\
+	\tilde{\bvarepsilon}(t) &= \bX_{-j}(t)\be_j(t) + \bvarepsilon(t)\\
+	                        &= \sum_{\substack{l \neq j}} \bX_l(t)e_{jl}(t) + \bvarepsilon(t) \in \R^{n_t},\\
+	t &= t_1, \cdots, t_n, j = 1, \cdots, p.\\
+	\end{aligned}
+\end{equation}
+As seen in Equation~(\ref{eq:flm2}), our model is quite flexible since the basis of each functional coefficient can be various for different nodes.
+
+
+Combing the data from $t_1, \cdots, t_n$, we can get the matrix form of Model~\ref{eq:flm}.
+\begin{equation}
+    \label{eq:flm3}
+	\begin{aligned}
+	\bX_j &= \bU_j \bgamma_j + \tilde{\bvarepsilon}_j, j = 1, \cdots, p.\\
+	\text{where }\bX_j &= (X_j(t_1)', \cdots, X_j(t_n)')' \in \R^{\sum_{t = 1}^{n}n_t \times 1}\\
+	\bU_j &= ( \bU_j(t_1)', \cdots, \bU_j(t_n)' )' \in \R^{\sum_{t = 1}^{n}n_t \times \sum_{\substack{j \neq i}}k_{jl}}\\
+	\tilde{\bvarepsilon}_j &= (\tilde{\bvarepsilon}_j(t_1), \cdots, \tilde{\bvarepsilon}_j(t_n))^T \in \R^{\sum_{t = 1}^{n}n_t \times 1}
+	\end{aligned}	
+\end{equation}
+	For each node $j$, least square of coefficient vector $\bgamma_j$ in the model~\ref{eq:flm3} is
+    $$\begin{aligned}
+	l(\bgamma_j) &= (\bX_j - \bU_j \bgamma_j)'\bW (\bX_j - \bU_j \bgamma_j)\\
+	&= \sum_{i = 1}^{n}(\bX_j(t_i) - \bU_j(t_i) \bgamma_j)^2 w_i\\
+	&= \sum_{i = 1}^{n}(\bX_j(t_i) - \bX_{-j}(t_i) \bbeta_j(t_i))^2 w_i\\
+	\end{aligned}$$
+ 
+\subsection{Control The Sparsity Of Derivatives}
+
+In Model~(\ref{eq:flm3}), we want to estimate a sparse graph as well as control the smoothness of coefficient functions. Typically, for each $j$ and $l \neq j$, we want to control the sparsity and smoothness of $\beta_{jl}(t) \approx \sum_{\substack{s=1}}^{k_{jl}} B_{jls}(t) \gamma_{jls}$. Our approach is to choose $m$-degree basis function and put $l_1$ penalty on $\beta_{jl}(t)$ and total variation penalty on $\beta_{jl}^{(m)} = \frac{\mathrm{d^m}}{\mathrm{d} t^m} \beta_{jl}(t) \approx \frac{\mathrm{d^m}}{\mathrm{d} t^m} \bB_{jl}(t)^T \bgamma_{jl}$.
+% $ \beta_{jl}^{(m)} = \frac{\mathrm{d^m}}{\mathrm{d} t^m} \beta_{jl}(t) \approx \frac{\mathrm{d^m}}{\mathrm{d} t^m} \bB_{jl}(t)^T \bgamma_{jl}$ for some $m$. One typical choice is to put $l_1$ penalty on $\beta_j$
+
+%Say assume $\beta_{jl}^{(0)}(t) = 0$ and $\beta_{jl}^{(2)}(t) = 0$ in large area, then $\beta_{jl}(t)$ is zero in many region and linear in the remain regions.
+
+Let 
+\begin{equation}
+	\bA_{jl} = \left( \frac{\mathrm{d^m}}{\mathrm{d} t^m} \bB_{jl}(t_1), \cdots, \frac{\mathrm{d^m}}{\mathrm{d} t^m} \bB_{jl}(t_n) \right)^T \in \R^{n \times k_{jl}},
+\end{equation} 
+
+Next, set
+\begin{equation}
+	\bseta_{jl} = \bA_{jl} \bgamma_{jl} \in \R^{n \times 1}  
+\end{equation}
+Then $\bseta_{jl} \approx (\beta_{jl}^{(m)}(t_k))_{1 \leq k \leq n}$. Moreover, we denote 
+\begin{equation}
+	\begin{aligned}
+	\bseta_j &= (\bseta_{jl})_{l \neq j} = \bA_j \bgamma_j \in \R^{n(p-1)},\\
+    \text{where }\bA_j&= \text{diag}(\bA_{jl})_{l \neq j} \in \R^{n(p-1)  \times \sum_{\substack{l \neq j}} k_{jl} }.
+	\end{aligned}
+\end{equation}
+We want to put the sparsity penalty on the $\bseta_j$. Then Model~(\ref{eq:flm3}) can be expressed as the following $\ell_1$ optimization problem, which is a generalized lasso problem. 
+   
+\begin{equation}
+    \label{eq:glars}
+    \begin{aligned}
+    \hat{\bgamma}_{j,L} &= \text{arg} \min_{\substack{\bgamma_j}} \frac{1}{2}\|\bX_j - \bU_j \bgamma_j\|_2^2 \\
+    \text{subject to } \|\bseta_j\|_1 &= \|\bA_j \bgamma_j\|_1 \leq t\\
+    \text{i.e. }\hat{\bgamma}_{j,L} &= \arg\min_{\substack{\bgamma_j}} \frac{1}{2}\|\bX_j - \bU_j \bgamma_j\|_2^2 + \lambda \|\bA_j \bgamma_j\|_1\\
+    \end{aligned}
+\end{equation}
+
+Moreover, if we want to control the sparsity of multiple derivatives of $\bbeta_{jl}(t)$, say we want both $\bbeta_{jl}^{(0)}(t) = 0$ and $\bbeta_{jl}^{(2)}(t) = 0$ in large area.
+
+\paragraph{B-splines Basis}
+A typical choice of basis function is the B-splines basis, which is defined recursively on nodes $t_1, \cdots, t_n$.
+\begin{itemize}
+	\item $B_i^1(x) = \ind_{[t_i, t_{i+1})}(x), i = 1, \cdots, n-1. $
+	\item $B_i^k(x) = \frac{x - t_i}{t_{i+k-1} - t_i} B_i^{k-1}(x) + \frac{t_{i+k} - x}{t_{i+k} - t_{i+1}} B_{i + 1}^{k-1}(x)$ 
+\end{itemize}
+Then the derivatives of B-splines have the form:
+$$\frac{\mathrm{d}}{\mathrm{d}x} B_i^k(x) = \frac{k-1}{t_{i+k-1} - t_i}B_i^{k-1}(x) - \frac{k-1}{t_{i+k} - t_{i+1}}B_{i+1}^{k-1}(x)$$
+When the knots are evenly spaced with gap $\Delta t$, the derivatives can be written as
+$$ \frac{\mathrm{d}}{\mathrm{d}x} B_i^k(x) = \frac{B_i^{k-1}(x) - B_{i+1}^{k-1}(x)}{\Delta t }. $$
+
+\section{Optimization}
+
+In order to solve Model~(\ref{eq:flm3}), an Alternative Direction Methods of Multiplier (ADMM) approach has been developed. 
+
+For each $j$, Model~(\ref{eq:flm3}) can be rewritten as
+\begin{equation}
+	\label{eq:genlasso}
+	\begin{aligned}
+	&\min \frac{1}{2} \|\bX_j - \bU_j \gamma_j \|_2^2 + \lambda \|\bdeta_j \|_1 \\
+	&\text{Subject to } \bdeta_j = \bA_j \bgamma_j\\
+	\end{aligned}	
+\end{equation} 
+
+The augmented Lagrange of Model~(\ref{eq:genlasso}) is as following:
+\begin{equation}
+	\label{eq:lagrange}
+	L_{\rho}(\bgamma_j, \bdeta_j, \by) = \frac{1}{2} \|\bX_j - \bU_j \bgamma_j \|_2^2 + \lambda \|\bdeta_j \|_1 + \rho \by'(\bdeta_j - \bA_j \bgamma_j) + \frac{\rho}{2} \|\bdeta_j - \bA_j \bgamma_j\|_2^2
+\end{equation}
+Then the updating rule for $\bgamma_j^{(k)}$ is
+\begin{equation}
+	\label{eq:update_gamma}
+	\begin{aligned}
+	\bgamma_j^{(k)} &= \argmin_{\substack{\bgamma}} L_{\rho}(\bgamma, \bdeta_j^{(k-1)}, \by^{(k-1)}) \\
+	                &= \argmin_{\substack{\bgamma}} \frac{1}{2} \|\bX_j - \bU_j \bgamma \|_2^2  + \frac{\rho}{2} \|\bdeta_j^{(k)} - \bA_j \bgamma + \by^{(k-1)}\|_2^2\\
+	                &= (\bU'_j\bU_j + \rho\bA'_j\bA_j)^{+}\left[\bU'_j\bX_j + \rho \bA'_j(\bdeta^{(k-1)} + \by^{(k-1)})\right]\\
+	\end{aligned}
+\end{equation}
+The updating rule for $\bdeta_j^{(k)}$ is
+\begin{equation}
+	\label{eq:update_eta}
+	\begin{aligned}
+	\bdeta_j^{(k)} &= \argmin_{\substack{\bdeta}} L_{\rho}(\bgamma_j^{(k)}, \bdeta, \by^{(k-1)}) \\
+	               &= \argmin_{\substack{\bdeta}} \lambda \|\bdeta \|_1  + \frac{\rho}{2} \|\bdeta - \bA_j \bgamma_j^{(k)} + \by^{(k-1)}\|_2^2\\ 
+	               &= \text{prox}_{\lambda/\rho |\cdot|_1}(\bA_j \bgamma_j^{(k)} - \by^{(k-1)}) \\
+	               &= \mathcal{S}_{\lambda/\rho}(\bA_j \bgamma_j^{(k)} - \by^{(k-1)}) \\
+	               \text{where } \mathcal{S}_{u}(\bx) &= (\bx-u)_{+} - (-\bx - u)_{+}
+	\end{aligned}
+\end{equation}
+The updating rule for $\by^{(k)}$ is
+\begin{equation}
+	\label{eq:update_y}
+	\begin{aligned}
+	\by^{(k)} &= \by^{(k-1)} + \rho ( \bdeta^{(k)} -\bA_j \bgamma_j^{(k)})
+	\end{aligned}
+\end{equation}
+
+\section{Tuning Parameter}
+
+Akaike information criterion (AIC) and Bayes information criterion (BIC) are common model selection criteria to achieve optimal prediction error. However these methods usually have good theoretical properties in low dimensions and are not suitable for high dimensional problems. Stability selection is a method for tunning parameter of estimation of structure. 
+
+\bibliographystyle{asa}
+\bibliography{dynamicgraph}
+\end{document}
